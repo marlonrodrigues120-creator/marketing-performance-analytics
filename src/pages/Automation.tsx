@@ -9,7 +9,6 @@ import { describeTrigger, defOf, METRIC_LABELS } from '../automation/catalog'
 import { TEMPLATES, workflowFromTemplate, type Template } from '../automation/templates'
 import type { ConditionRule, Execution, Workflow } from '../automation/types'
 import { dateTimeBR, percent, relTime } from '../lib/format'
-import { PageGuide } from '../components/didactic'
 
 export default function Automation() {
   const s = useStore()
@@ -83,14 +82,13 @@ export default function Automation() {
   return (
     <>
       <PageHeader title="Automações" description="Criação, execução e monitoramento de workflows. O app guarda configurações e histórico; o n8n executa agendamentos, condições e envios via webhooks autenticados." actions={s.can('edit') && <><button className="btn-secondary" onClick={() => setTab('templates')}><Sparkles size={14} /> Usar modelo</button><button className="btn-primary" onClick={() => nav('/automation/workflows/new')}><Plus size={14} /> Criar workflow</button></>} />
-      <PageGuide id="automation" />
 
       <div className={clsx('mb-4 flex flex-wrap items-center gap-3 rounded-xl border p-3 text-xs', s.settings.integrations.n8nConnected ? 'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200' : 'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200')}>
         <Plug size={16} />
         <div className="flex-1">
-          {s.settings.integrations.n8nConnected ? <><b>n8n conectado.</b> Execuções disparadas pelo backend.</> : <><b>Modo demonstração:</b> o n8n não está configurado. As execuções rodam no motor local do app, com os mesmos dados e regras, e e-mails/Slack/webhooks são simulados (não enviados).</>}
+          {s.settings.integrations.n8nConnected ? <><b>n8n conectado.</b> Execuções disparadas pelo backend.</> : <><b>n8n não conectado.</b> As execuções rodam no motor interno do app, com as mesmas regras; e-mails, Slack e webhooks ficam registrados no histórico sem envio.</>}
         </div>
-        <Link to="/settings#integrations" className="font-semibold underline">Como configurar</Link>
+        <Link to="/settings?tab=integrations" className="font-semibold underline">Como configurar</Link>
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">

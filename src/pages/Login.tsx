@@ -90,13 +90,24 @@ export default function Login() {
           <Logo />
           <span className="text-[15px] font-semibold tracking-tight">Marketing Performance</span>
         </div>
-        <div className="my-auto max-w-lg">
-          <p className="text-sm text-slate-400">Últimos 30 dias, conta de exemplo</p>
-          <p className="mt-4 text-[2.6rem] font-semibold leading-[1.12] tracking-[-0.02em]">Cada R$ 1 em anúncios voltou como R$ 3,86 em receita.</p>
-          <p className="mt-5 max-w-md text-[15px] leading-relaxed text-slate-300">O painel traduz CAC, ROAS, ROI e funil em frases como esta, aponta onde o orçamento rende menos e automatiza os alertas.</p>
+        <div className="my-auto max-w-xl">
+          <h2 className="text-[2.75rem] font-semibold leading-[1.08] tracking-[-0.03em]">Descubra quais campanhas dão lucro e quais só consomem verba.</h2>
+          <p className="mt-5 max-w-md text-[15px] leading-relaxed text-slate-300">Investimento, receita, CAC, ROAS e ROI de todos os canais em um só painel, com alertas automáticos quando algo sai da meta.</p>
+          <div className="mt-10 grid max-w-md grid-cols-3 gap-3">
+            {[
+              ['ROAS', '3,86x', '+12%'],
+              ['CAC', 'R$ 150', '−8%'],
+              ['ROI', '80%', '+5 p.p.'],
+            ].map(([l, v, dlt]) => (
+              <div key={l} className="rounded-2xl bg-white/[0.06] p-4 ring-1 ring-white/10">
+                <div className="text-xs text-slate-400">{l}</div>
+                <div className="mt-1 text-xl font-semibold tabular">{v}</div>
+                <div className="mt-0.5 text-xs text-emerald-300">{dlt}</div>
+              </div>
+            ))}
+          </div>
           <MiniBars />
         </div>
-        <p className="text-xs text-slate-500">Projeto de portfólio. Os números exibidos no app são fictícios.</p>
       </aside>
 
       <main className="flex items-center justify-center px-6 py-10">
@@ -174,7 +185,7 @@ export default function Login() {
               <button type="button" onClick={visitor} className="btn-secondary h-11 w-full text-[15px]">
                 <UserRound size={16} /> Entrar como visitante
               </button>
-              <p className="mt-3 text-center text-xs leading-relaxed text-slate-500">Explore tudo com dados de exemplo, sem cadastro. O que você criar fica só neste navegador.</p>
+              <p className="mt-3 text-center text-xs leading-relaxed text-slate-500">Explore todas as telas sem cadastro.</p>
             </>
           )}
         </div>
@@ -186,7 +197,7 @@ export default function Login() {
 function MiniBars() {
   const v = [38, 44, 41, 52, 48, 57, 63, 59, 68, 74, 71, 82]
   return (
-    <div className="mt-10 flex h-24 items-end gap-1.5" aria-hidden="true">
+    <div className="mt-3 flex h-20 max-w-md items-end gap-1.5 rounded-2xl bg-white/[0.04] p-4 ring-1 ring-white/10" aria-hidden="true">
       {v.map((h, i) => <div key={i} className="flex-1 rounded-t-[5px]" style={{ height: `${h}%`, background: i === v.length - 1 ? '#6c82fe' : 'rgba(255,255,255,0.12)' }} />)}
     </div>
   )

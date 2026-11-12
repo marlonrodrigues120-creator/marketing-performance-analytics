@@ -3,13 +3,12 @@ import clsx from 'clsx'
 import { TrendingDown, TrendingUp, Minus } from 'lucide-react'
 import { useAnalytics } from '../store/useAnalytics'
 import { useStore } from '../store/AppStore'
-import { Card, DemoBadge, EmptyState, PageHeader, Segmented, Toggle } from '../components/ui'
+import { Card, EmptyState, PageHeader, Segmented, Toggle } from '../components/ui'
 import { Legend, useChartTheme } from '../components/charts'
 import { autoGranularity, TrendLine } from '../components/widgets'
 import { timeSeries, trendSlope, type Granularity } from '../lib/metrics'
 import { KPIS, getKpi, type KpiKey } from '../lib/kpis'
 import { signedPct } from '../lib/format'
-import { PageGuide } from '../components/didactic'
 
 const METRICS: { k: KpiKey; title: string }[] = [
   { k: 'investment', title: 'Investimento' },
@@ -51,7 +50,7 @@ export default function Performance() {
       <PageHeader
         title="Evolução no tempo"
         description="Séries temporais dos principais indicadores. A tendência é a inclinação da regressão linear, em % da média por período."
-        badge={<DemoBadge />}
+       
         actions={
           <>
             <label className="flex items-center gap-2 text-xs"><Toggle checked={compare && a.hasPrev} disabled={!a.hasPrev} onChange={setCompare} label="Comparar com período anterior" /> Comparar com período anterior</label>
@@ -59,7 +58,6 @@ export default function Performance() {
           </>
         }
       />
-      <PageGuide id="performance" />
       <div className="mb-4 flex flex-wrap gap-1.5">
         {METRICS.map((m) => {
           const on = selected.includes(m.k)

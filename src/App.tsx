@@ -13,13 +13,11 @@ const Channels = lazy(() => import('./pages/Channels'))
 const Funnel = lazy(() => import('./pages/Funnel'))
 const Financial = lazy(() => import('./pages/Financial'))
 const Performance = lazy(() => import('./pages/Performance'))
-const Insights = lazy(() => import('./pages/Insights'))
 const Simulator = lazy(() => import('./pages/Simulator'))
 const Automation = lazy(() => import('./pages/Automation'))
 const Builder = lazy(() => import('./pages/Builder'))
 const DataImport = lazy(() => import('./pages/DataImport'))
 const SettingsPage = lazy(() => import('./pages/Settings'))
-const Learn = lazy(() => import('./pages/Learn'))
 
 function Guard({ children }: { children: ReactNode }) {
   const { user } = useStore()
@@ -58,13 +56,11 @@ const router = createHashRouter(
         <Route path="funnel" element={page(<Funnel />)} />
         <Route path="financial" element={page(<Financial />)} />
         <Route path="performance" element={page(<Performance />)} />
-        <Route path="insights" element={page(<Insights />)} />
         <Route path="simulator" element={page(<Simulator />)} />
         <Route path="automation" element={page(<Automation />)} />
         <Route path="automation/workflows/:id" element={page(<Builder />)} />
         <Route path="import" element={page(<DataImport />)} />
         <Route path="settings" element={page(<SettingsPage />)} />
-        <Route path="learn" element={page(<Learn />)} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </>,

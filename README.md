@@ -9,17 +9,15 @@ Na tela de login: **Entrar como visitante** (sem cadastro), **Criar conta** ou *
 
 ![Overview](docs/screenshots/overview.png)
 
-## Inspiração e abordagem didática
+## Inspiração
 
-O desenho se inspira em ferramentas de referência de performance de marketing: o resumo em frases e os cartões de KPI do **Triple Whale**, a visão por canal e a discussão de atribuição do **Northbeam**, os insights automáticos do **GA4** e a organização de painéis do **HubSpot**. O editor de automações segue a lógica de nós do **n8n**, Make e Zapier.
-
-O **modo didático** (ligado por padrão) acrescenta: um guia de leitura em cada tela, uma frase em linguagem simples sob cada indicador ("cada R$ 1 em anúncios trouxe R$ 3,86"), o resumo narrativo do período no Overview, um tour de boas-vindas e a página **Aprenda**, com o caminho do investimento ao lucro e um glossário que usa os números do período como exemplo. A busca rápida (**Ctrl+K**) abre qualquer tela, campanha ou pergunta para a IA.
+O desenho se inspira em ferramentas de referência de performance de marketing: o resumo do período e os cartões de KPI do **Triple Whale**, a visão por canal e a discussão de atribuição do **Northbeam**, os alertas automáticos do **GA4** e a organização de painéis do **HubSpot**. O editor de automações segue a lógica de nós do **n8n**, Make e Zapier, com o fluxo de cima para baixo.
 
 ## O que a aplicação faz
 
 | Módulo | Destaques |
 |---|---|
-| **Overview** | 10 KPIs com variação vs. período anterior, tendência contextual (CAC caindo = positivo), tooltip com fórmula e sparkline; investimento × receita, evolução de CAC/ROAS com metas, leads e conversões, distribuição por canal, ranking de campanhas |
+| **Overview** | Resumo do período, 10 KPIs com variação vs. período anterior e tendência contextual (CAC caindo = positivo), investimento × receita, investimento por canal, evolução de CAC/ROAS, leads e conversões, funil e campanhas com mais receita |
 | **Filtros globais** | Período (presets e personalizado), canal, campanha, plataforma e tipo de conversão — aplicados uma única vez (`useAnalytics`) e consumidos por todas as páginas, garantindo cards, gráficos, tabelas e insights consistentes |
 | **Campaigns** | Tabela com 15 indicadores, ordenação, pesquisa, filtros, exportação CSV, melhores/piores campanhas e página de detalhe com histórico, comparação com a média do mesmo objetivo e insights específicos |
 | **Campaign Score** | Nota 0–100 por campanha com metas e pesos **por objetivo** (Vendas, Geração de leads, Awareness), configuráveis, e explicação dos fatores |
@@ -27,20 +25,19 @@ O **modo didático** (ligado por padrão) acrescenta: um guia de leitura em cada
 | **Conversion Funnel** | Impressões → cliques → visitantes → leads → oportunidades → clientes, perdas por etapa, comparação com período anterior, detecção automática de gargalos vs. referências e recomendações; por canal e campanha |
 | **Financial Analysis** | Da receita ao lucro estimado (margem bruta configurável), rentabilidade por canal/campanha e as fórmulas aplicadas com os valores do período |
 | **Performance over Time** | Séries diárias/semanais/mensais, sobreposição do período anterior e tendência por regressão linear |
-| **Marketing Insights** | 10 regras (CAC acima da média, ROAS abaixo da meta, alta de CPC, queda de conversão, redistribuição de orçamento…) com evidências, impacto e prioridade |
-| **AI Marketing Analyst** | Perguntas em linguagem natural respondidas com números reais, gráficos de apoio e ressalva explícita quando há só correlação; com backend, usa a OpenAI com contexto agregado em SQL |
-| **AI Report Generator** | Relatório executivo do período (copiar, Markdown, imprimir/PDF) |
+| **Alertas** | 10 regras (CAC acima da média, ROAS abaixo da meta, alta de CPC, queda de conversão, redistribuição de orçamento…) no detalhe de cada campanha e nas automações |
 | **Budget Simulator** | Redistribuição de mídia com retornos decrescentes (elasticidade β), sugestão automática, cenários salvos — projeções sempre separadas de resultados reais e sem alterar plataformas sem confirmação |
 | **Automation Center** | KPIs de automação, CRUD de workflows, ativar/pausar, teste manual, histórico, logs, 6 modelos obrigatórios + 2 de IA |
 | **Workflow Builder** | Editor visual de nós (React Flow): gatilhos, condições AND/OR com saídas SIM/NÃO, ações, validação (gatilho único, nós desconectados, ciclos), teste com status por nó |
 | **Data Import** | CSV com detecção de colunas, mapeamento, validação (datas, números pt-BR/en, negativos), duplicidades (no arquivo e na base), valores ausentes, confirmação, histórico e reversão |
+| **Conta** | Entrar, criar conta, redefinir senha, entrar como visitante; menu do perfil com conta, metas, score, integrações, automações, importação, tema e restauração dos dados |
 | **Settings** | Metas, margem, atribuição, score, integrações (teste de conexão com a API), RBAC e reset da demo |
 
 | | |
 |---|---|
-| ![Workflow builder](docs/screenshots/workflow-builder.png) | ![AI Analyst](docs/screenshots/ai-analyst.png) |
+| ![Workflow builder](docs/screenshots/workflow-builder.png) | ![Campanha](docs/screenshots/campaign-detail.png) |
 | ![Funil](docs/screenshots/funnel.png) | ![Tema escuro](docs/screenshots/overview-dark.png) |
-| ![Login](docs/screenshots/login.png) | ![Aprenda](docs/screenshots/learn.png) |
+| ![Login](docs/screenshots/login.png) | ![Simulador](docs/screenshots/budget-simulator.png) |
 
 ## Fórmulas e regras de negócio
 
@@ -59,7 +56,7 @@ O **modo didático** (ligado por padrão) acrescenta: um guia de leitura em cada
 - **Receita não é lucro**: ROI parte do lucro bruto; um ROAS > 1 pode ter ROI negativo (a tela financeira mostra o ROAS de break-even).
 - **Divisão por zero** retorna `null`, exibido como “—” (ex.: ROAS de canal orgânico).
 - **Atribuição**: last-click, documentado na interface. Modelos first-click/linear dependem de dados de jornada (GA4/CRM) no backend.
-- Insights descrevem associações observadas e recomendam investigação — não afirmam causalidade.
+- Alertas descrevem associações observadas e recomendam investigação — não afirmam causalidade.
 
 ## Arquitetura
 
@@ -67,7 +64,7 @@ O **modo didático** (ligado por padrão) acrescenta: um guia de leitura em cada
 flowchart LR
   subgraph Frontend [React + TypeScript + Tailwind]
     UI[Páginas e componentes] --> Store[(Store + filtros globais)]
-    Store --> Lib[lib: métricas, insights, score, analista]
+    Store --> Lib[lib: métricas, alertas, score]
     Store --> Engine[motor de workflows demo]
   end
   subgraph Backend [FastAPI]
@@ -92,7 +89,7 @@ flowchart LR
 ```
 src/
   data/          gerador da base demonstrativa e tipos
-  lib/           métricas, KPIs, insights, score, analista de IA, relatório
+  lib/           métricas, KPIs, alertas, score
   automation/    catálogo de nós, modelos, motor de execução e validação
   store/         estado global, filtros, configurações
   components/    UI, gráficos, layout

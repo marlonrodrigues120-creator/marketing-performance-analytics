@@ -7,7 +7,7 @@ import { TEMPLATES, workflowFromTemplate } from '../automation/templates'
 import { runWorkflow } from '../automation/engine'
 import { addDays } from '../lib/query'
 import { uid } from '../automation/catalog'
-import { authenticate, createAccount } from './auth'
+import { authenticate, createAccount, renameAccount } from './auth'
 
 export type Role = 'admin' | 'analyst' | 'viewer' | 'visitor'
 export interface User {
@@ -50,9 +50,9 @@ export interface Filters {
 
 const LS = {
   settings: 'mpa.settings',
-  workflows: 'mpa.workflows.v1',
-  executions: 'mpa.executions.v1',
-  logs: 'mpa.logs.v1',
+  workflows: 'mpa.workflows.v2',
+  executions: 'mpa.executions.v2',
+  logs: 'mpa.logs.v2',
   notifications: 'mpa.notifications.v1',
   imports: 'mpa.imports.v1',
   importedRows: 'mpa.importedRows.v1',
@@ -91,11 +91,8 @@ interface Store {
   login: (email: string, password: string) => Promise<string | null>
   signup: (name: string, email: string, password: string) => Promise<string | null>
   enterAsVisitor: () => void
+  updateProfile: (name: string) => string | null
   logout: () => void
-  didactic: boolean
-  setDidactic: (v: boolean) => void
-  tourSeen: boolean
-  setTourSeen: (v: boolean) => void
   can: (perm: 'edit' | 'delete' | 'admin') => boolean
   channels: Channel[]
   campaigns: Campaign[]
@@ -190,10 +187,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [imports, setImports] = useState<ImportRecord[]>(() => load(LS.imports, []))
   const [tags, setTags] = useState<Record<string, string[]>>(() => load(LS.tags, {}))
   const [scenarios, setScenarios] = useState<Scenario[]>(() => load(LS.scenarios, []))
-  const [didactic, setDidactic] = useState<boolean>(() => load('mpa.didactic', true))
-  const [tourSeen, setTourSeen] = useState<boolean>(() => load('mpa.tourSeen', false))
-  useEffect(() => { save('mpa.didactic', didactic) }, [didactic])
-  useEffect(() => { save('mpa.tourSeen', tourSeen) }, [tourSeen])
   const [notifications, setNotifications] = useState<AppNotification[]>(() => load(LS.notifications, []))
 
   const campaigns = useMemo(() => [...demo.campaigns, ...importedCampaigns], [demo, importedCampaigns])
@@ -293,18 +286,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
       try {
         const acc = await createAccount(name, email, password)
         setUser({ name: acc.name, email: acc.email, role: 'admin' })
-        setTourSeen(false)
         return null
       } catch (e) {
         return (e as Error).message
       }
     },
+    updateProfile: (name) => {
+      if (!user || name.trim().length < 2) return 'Digite um nome com pelo menos 2 letras.'
+      try {
+        if (user.role !== 'visitor') renameAccount(user.email, name)
+      } catch (e) {
+        return (e as Error).message
+      }
+      setUser({ ...user, name: name.trim() })
+      return null
+    },
     enterAsVisitor: () => setUser({ name: 'Visitante', email: 'visitante', role: 'visitor' }),
     logout: () => setUser(null),
-    didactic,
-    setDidactic,
-    tourSeen,
-    setTourSeen,
     can: (perm) => {
       if (!user) return false
       // visitante explora tudo num ambiente isolado no próprio navegador

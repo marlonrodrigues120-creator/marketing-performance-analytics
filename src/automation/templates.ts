@@ -1,4 +1,4 @@
-import { chain, makeNode, uid } from './catalog'
+import { chain, layoutVertical, makeNode, uid } from './catalog'
 import type { Workflow } from './types'
 
 export interface Template {
@@ -152,5 +152,6 @@ export const TEMPLATES: Template[] = [
 
 export function workflowFromTemplate(t: Template, status: Workflow['status'] = 'active'): Workflow {
   const now = new Date().toISOString()
-  return { id: uid('wf'), name: t.name, description: t.description, status, templateId: t.id, ...t.build(), createdAt: now, updatedAt: now }
+  const { nodes, edges } = t.build()
+  return { id: uid('wf'), name: t.name, description: t.description, status, templateId: t.id, nodes: layoutVertical(nodes, edges), edges, createdAt: now, updatedAt: now }
 }

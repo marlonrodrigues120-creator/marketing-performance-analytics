@@ -5,9 +5,6 @@ import { Area, AreaChart, ResponsiveContainer } from 'recharts'
 import { InfoTip } from './ui'
 import { KPIS, trendTone, type KpiKey } from '../lib/kpis'
 import { signedPct } from '../lib/format'
-import { useStore } from '../store/AppStore'
-import { plain } from '../lib/learn'
-import type { Derived } from '../data/types'
 
 export function useIsDark() {
   const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'))
@@ -86,9 +83,7 @@ export function Legend({ items }: { items: { label: string; color: string; dashe
   )
 }
 
-export function KpiCard({ k, value, prev, spark, hasPrev = true, compact, sub, d }: { k: KpiKey; value: number | null; prev: number | null; spark?: (number | null)[]; hasPrev?: boolean; compact?: boolean; sub?: ReactNode; d?: Derived }) {
-  const { didactic } = useStore()
-  const explain = didactic && d ? plain(k, d) : null
+export function KpiCard({ k, value, prev, spark, hasPrev = true, compact, sub }: { k: KpiKey; value: number | null; prev: number | null; spark?: (number | null)[]; hasPrev?: boolean; compact?: boolean; sub?: ReactNode; d?: unknown }) {
   const def = KPIS[k]
   const delta = value !== null && prev !== null && prev !== 0 ? ((value - prev) / Math.abs(prev)) * 100 : null
   const tone = trendTone(k, delta)
@@ -123,8 +118,7 @@ export function KpiCard({ k, value, prev, spark, hasPrev = true, compact, sub, d
         )}
         {hasPrev && prev !== null && <span className="truncate muted">vs. {compact && def.fmtCompact ? def.fmtCompact(prev) : def.fmt(prev)}</span>}
       </div>
-      {sub && !explain && <div className="mt-1 text-[11px] muted">{sub}</div>}
-      {explain && <p className="relative z-10 mt-3 border-t border-slate-100 pt-2.5 text-[12px] leading-snug text-slate-600 dark:border-white/[0.06] dark:text-slate-300">{explain}</p>}
+      {sub && <div className="mt-1 text-[11px] muted">{sub}</div>}
       {data.length > 2 && !sub && (
         <div className="pointer-events-none absolute right-3 top-3 h-8 w-20">
           <ResponsiveContainer width="100%" height="100%">

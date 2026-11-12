@@ -4,13 +4,12 @@ import clsx from 'clsx'
 import { Trophy } from 'lucide-react'
 import { useAnalytics } from '../store/useAnalytics'
 import { useStore } from '../store/AppStore'
-import { Card, DataTable, DemoBadge, EmptyState, InfoTip, MultiSelect, PageHeader, type Column } from '../components/ui'
+import { Card, DataTable, EmptyState, InfoTip, MultiSelect, PageHeader, type Column } from '../components/ui'
 import { ChartTip, useChartTheme } from '../components/charts'
 import { MetricSelect, RankBars } from '../components/widgets'
 import { channelStats, type ChannelStat } from '../lib/query'
 import { KPIS, getKpi, type KpiKey } from '../lib/kpis'
 import { money, num, percent } from '../lib/format'
-import { PageGuide } from '../components/didactic'
 
 const METRICS: KpiKey[] = ['investment', 'revenue', 'impressions', 'clicks', 'leads', 'customers', 'cac', 'cpl', 'cpc', 'ctr', 'convRate', 'roas', 'roi', 'profit']
 
@@ -69,8 +68,7 @@ export default function Channels() {
 
   return (
     <>
-      <PageHeader title="Canais" description="Comparação entre canais de aquisição. Canais sem investimento em mídia não têm CPC nem ROAS (exibidos como —)." badge={<DemoBadge />} />
-      <PageGuide id="channels" />
+      <PageHeader title="Canais" description="Comparação entre canais de aquisição. Canais sem investimento em mídia não têm CPC nem ROAS (exibidos como —)." />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {LEADERS.map((l) => {
           const valid = stats.filter((s) => getKpi(s.d, l.k) !== null && (l.k !== 'convRate' || s.d.clicks > 500))

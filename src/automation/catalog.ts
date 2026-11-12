@@ -116,3 +116,31 @@ export function describeTrigger(wf: Workflow): { trigger: string; frequency: str
   const frequency = f === 'hourly' ? 'A cada hora' : f === 'weekly' ? `Segundas, ${time}` : f === 'daily' ? `Diário, ${time}` : 'Por evento'
   return { trigger: def?.label ?? String(t.data.type), frequency }
 }
+
+/** Organiza o fluxo de cima para baixo: cada nível do grafo (a partir do gatilho) vira uma linha. */
+export function layoutVertical<N extends { id: string; position: { x: number; y: number }; data: { kind: NodeKind } }>(nodes: N[], edges: { source: string; target: string }[]): N[] {
+  const level = new Map<string, number>()
+  const roots = nodes.filter((n) => n.data.kind === 'trigger' || !edges.some((e) => e.target === n.id))
+  const queue = roots.map((r) => r.id)
+  roots.forEach((r) => level.set(r.id, 0))
+  while (queue.length) {
+    const id = queue.shift()!
+    for (const e of edges.filter((x) => x.source === id)) {
+      const l = level.get(id)! + 1
+      if ((level.get(e.target) ?? -1) < l && l < nodes.length) {
+        level.set(e.target, l)
+        queue.push(e.target)
+      }
+    }
+  }
+  const max = Math.max(0, ...level.values())
+  for (const n of nodes) if (!level.has(n.id)) level.set(n.id, max + 1)
+  const rows = new Map<number, N[]>()
+  for (const n of nodes) rows.set(level.get(n.id)!, [...(rows.get(level.get(n.id)!) ?? []), n])
+  const out = new Map<string, { x: number; y: number }>()
+  for (const [l, row] of rows) {
+    row.sort((a, b) => a.position.x - b.position.x)
+    row.forEach((n, i) => out.set(n.id, { x: (i - (row.length - 1) / 2) * 260 - 110, y: l * 170 }))
+  }
+  return nodes.map((n) => ({ ...n, position: out.get(n.id)! }))
+}

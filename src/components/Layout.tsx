@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import clsx from 'clsx'
-import { Bell, BookOpen, Calculator, CalendarDays, ChartLine, ChevronsLeft, ChevronsRight, CircleDollarSign, CircleHelp, Filter, GraduationCap, LayoutDashboard, LogOut, Megaphone, Menu, Moon, RotateCcw, Search, Settings, Share2, Sparkles, Sun, Upload, Workflow, X } from 'lucide-react'
+import { Bell, Calculator, CalendarDays, ChartLine, ChevronDown, ChevronsLeft, ChevronsRight, CircleDollarSign, Filter, Gauge, LayoutDashboard, LogOut, Megaphone, Menu, Moon, Plug, RotateCcw, Search, Settings, Share2, Sun, Target, Upload, UserRound, Users, Workflow, X } from 'lucide-react'
 import { useStore, type PeriodPreset } from '../store/AppStore'
-import { MultiSelect, Toaster, Toggle } from './ui'
-import { CommandPalette, WelcomeTour } from './didactic'
+import { MultiSelect, Toaster } from './ui'
+import { CommandPalette } from './CommandPalette'
+import { AccountModal } from './AccountModal'
 import { Logo } from './Logo'
 import { dateBR, relTime } from '../lib/format'
 import { addDays } from '../lib/query'
@@ -19,37 +20,22 @@ const NAV = [
     { to: '/performance', label: 'Evolução no tempo', icon: ChartLine },
   ] },
   { group: 'Inteligência', items: [
-    { to: '/insights', label: 'Insights e IA', icon: Sparkles },
     { to: '/simulator', label: 'Simulador de orçamento', icon: Calculator },
   ] },
   { group: 'Automação', items: [{ to: '/automation', label: 'Automações', icon: Workflow }] },
   { group: 'Dados', items: [
     { to: '/import', label: 'Importar dados', icon: Upload },
-    { to: '/learn', label: 'Aprenda', icon: GraduationCap },
     { to: '/settings', label: 'Configurações', icon: Settings },
   ] },
 ]
-const FILTER_ROUTES = ['/', '/campaigns', '/channels', '/funnel', '/financial', '/performance', '/insights']
+const FILTER_ROUTES = ['/', '/campaigns', '/channels', '/funnel', '/financial', '/performance']
 
 export default function Layout() {
-  const { tourSeen, setTourSeen, user } = useStore()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem('mpa.sidebar') === 'collapsed')
   const [palette, setPalette] = useState(false)
-  const [tour, setTour] = useState(false)
   const loc = useLocation()
   useEffect(() => { setMobileOpen(false) }, [loc.pathname])
-  useEffect(() => { if (!tourSeen && user) setTour(true) }, [tourSeen, user])
-  useEffect(() => {
-    const h = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault()
-        setPalette((p) => !p)
-      }
-    }
-    window.addEventListener('keydown', h)
-    return () => window.removeEventListener('keydown', h)
-  }, [])
   const toggleCollapse = () => {
     localStorage.setItem('mpa.sidebar', collapsed ? 'open' : 'collapsed')
     setCollapsed(!collapsed)
@@ -85,54 +71,29 @@ export default function Layout() {
             </div>
           ))}
         </nav>
-        <DataStatus collapsed={collapsed} />
         <button onClick={toggleCollapse} className="hidden h-11 items-center justify-center gap-2 border-t border-white/5 text-xs text-slate-400 hover:text-white lg:flex" aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}>
           {collapsed ? <ChevronsRight size={16} /> : <><ChevronsLeft size={16} /> Recolher menu</>}
         </button>
       </aside>
       {mobileOpen && <div className="fixed inset-0 z-40 bg-slate-900/40 lg:hidden" onClick={() => setMobileOpen(false)} />}
       <div className={clsx('transition-[padding] duration-200', collapsed ? 'lg:pl-[72px]' : 'lg:pl-64')}>
-        <VisitorBar />
-        <Topbar onMenu={() => setMobileOpen(true)} onSearch={() => setPalette(true)} onTour={() => setTour(true)} />
+        <Topbar onMenu={() => setMobileOpen(true)} onSearch={() => setPalette(true)} />
         {showFilters && <FilterBar />}
         <main key={isBuilder ? 'builder' : loc.pathname} className="mx-auto max-w-[1600px] px-4 py-6 motion-safe:animate-fade-up sm:px-6 lg:px-8">
           <Outlet />
         </main>
       </div>
       <CommandPalette open={palette} onClose={() => setPalette(false)} />
-      <WelcomeTour open={tour} onClose={() => { setTour(false); setTourSeen(true) }} />
       <Toaster />
     </div>
   )
 }
 
-function VisitorBar() {
-  const { user, logout } = useStore()
-  const nav = useNavigate()
-  if (user?.role !== 'visitor') return null
-  return (
-    <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-brand-500 px-4 py-2 text-center text-[13px] text-white">
-      Você está como visitante: o que criar fica salvo só neste navegador.
-      <button className="rounded-lg bg-white/15 px-2.5 py-0.5 font-medium hover:bg-white/25" onClick={() => { logout(); nav('/login?mode=signup') }}>Criar conta</button>
-    </div>
-  )
-}
-
-function DataStatus({ collapsed }: { collapsed: boolean }) {
-  const { dataStart, dataEnd, importedRowCount } = useStore()
-  if (collapsed) return <div className="mx-auto mb-3 hidden h-2 w-2 rounded-full bg-amber-400 lg:block" title="Dados fictícios" />
-  return (
-    <div className="mx-3 mb-3 rounded-xl bg-white/5 p-3 text-[11px] leading-relaxed text-slate-400">
-      <div className="mb-0.5 flex items-center gap-1.5 font-medium text-amber-300"><span className="h-1.5 w-1.5 rounded-full bg-amber-400" /> Dados fictícios</div>
-      De {dateBR(dataStart)} a {dateBR(dataEnd)}{importedRowCount > 0 && `, mais ${importedRowCount} linhas importadas`}. Receita atribuída pelo último clique.
-    </div>
-  )
-}
-
-function Topbar({ onMenu, onSearch, onTour }: { onMenu: () => void; onSearch: () => void; onTour: () => void }) {
-  const { user, logout, notifications, markNotificationsRead, clearNotifications, didactic, setDidactic } = useStore()
+function Topbar({ onMenu, onSearch }: { onMenu: () => void; onSearch: () => void }) {
+  const { user, logout, notifications, markNotificationsRead, clearNotifications, executions, workflows } = useStore()
   const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'))
-  const [menu, setMenu] = useState<null | 'n' | 'u' | 'h'>(null)
+  const [menu, setMenu] = useState<null | 'n' | 'u'>(null)
+  const [account, setAccount] = useState(false)
   const nav = useNavigate()
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -149,29 +110,17 @@ function Topbar({ onMenu, onSearch, onTour }: { onMenu: () => void; onSearch: ()
   const unread = notifications.filter((n) => !n.read).length
   const initials = (user?.name ?? '?').split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
   const pop = 'absolute right-0 top-full mt-2 rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-white/10 dark:bg-navy-800'
+  const item = 'flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/5'
+  const go = (to: string) => { setMenu(null); nav(to) }
+  const errors = executions.filter((e) => e.status === 'error').length
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-slate-200/80 bg-white/85 px-4 backdrop-blur-md dark:border-white/[0.06] dark:bg-navy-950/85 sm:px-6 lg:px-8">
       <button className="btn-ghost p-2 lg:hidden" onClick={onMenu} aria-label="Abrir menu"><Menu size={18} /></button>
       <button onClick={onSearch} className="flex h-9 w-full max-w-sm items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-500 hover:border-slate-300 dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
         <Search size={15} />
-        <span className="flex-1 truncate text-left">Buscar ou perguntar…</span>
-        <kbd className="hidden rounded-md border border-slate-200 bg-white px-1.5 text-[11px] dark:border-white/10 dark:bg-white/5 sm:inline">Ctrl K</kbd>
+        <span className="flex-1 truncate text-left">Buscar telas e campanhas</span>
       </button>
       <div className="ml-auto flex items-center gap-1" ref={ref}>
-        <label className="mr-1 hidden cursor-pointer items-center gap-2 rounded-xl px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/5 sm:flex" title="Mostra guias e explicações em linguagem simples">
-          <BookOpen size={15} className="text-brand-500" /> Modo didático <Toggle checked={didactic} onChange={setDidactic} label="Modo didático" />
-        </label>
-        <div className="relative">
-          <button className="btn-ghost p-2" aria-label="Ajuda" onClick={() => setMenu(menu === 'h' ? null : 'h')}><CircleHelp size={18} /></button>
-          {menu === 'h' && (
-            <div className={clsx(pop, 'w-60 p-1.5')}>
-              <button className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-white/5" onClick={() => { setMenu(null); onTour() }}><GraduationCap size={15} /> Rever o tour</button>
-              <button className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-white/5" onClick={() => { setMenu(null); nav('/learn') }}><BookOpen size={15} /> Glossário das métricas</button>
-              <button className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-white/5" onClick={() => { setMenu(null); nav('/insights?tab=analyst') }}><Sparkles size={15} /> Perguntar à IA</button>
-              <label className="flex items-center justify-between rounded-xl px-3 py-2 text-sm sm:hidden">Modo didático <Toggle checked={didactic} onChange={setDidactic} label="Modo didático" /></label>
-            </div>
-          )}
-        </div>
         <button className="btn-ghost p-2" onClick={toggleTheme} aria-label={dark ? 'Usar tema claro' : 'Usar tema escuro'}>{dark ? <Sun size={18} /> : <Moon size={18} />}</button>
         <div className="relative">
           <button className="btn-ghost relative p-2" aria-label="Notificações" onClick={() => setMenu(menu === 'n' ? null : 'n')}>
@@ -190,7 +139,7 @@ function Topbar({ onMenu, onSearch, onTour }: { onMenu: () => void; onSearch: ()
               <div className="max-h-96 overflow-y-auto">
                 {notifications.length === 0 && <p className="px-4 py-8 text-center text-xs text-slate-500">Os alertas das automações aparecem aqui.</p>}
                 {notifications.slice(0, 30).map((n) => (
-                  <button key={n.id} onClick={() => { setMenu(null); nav(n.link ?? '/automation') }} className={clsx('block w-full border-b border-slate-50 px-4 py-2.5 text-left hover:bg-slate-50 dark:border-white/5 dark:hover:bg-white/5', !n.read && 'bg-brand-50/60 dark:bg-brand-500/5')}>
+                  <button key={n.id} onClick={() => go(n.link ?? '/automation')} className={clsx('block w-full border-b border-slate-50 px-4 py-2.5 text-left hover:bg-slate-50 dark:border-white/5 dark:hover:bg-white/5', !n.read && 'bg-brand-50/60 dark:bg-brand-500/5')}>
                     <div className="flex items-center gap-1.5 text-xs font-medium">
                       <span className={clsx('h-1.5 w-1.5 rounded-full', n.severity === 'critical' ? 'bg-bad' : n.severity === 'warning' ? 'bg-warn' : n.severity === 'success' ? 'bg-good' : 'bg-brand-500')} />
                       {n.title}
@@ -204,22 +153,44 @@ function Topbar({ onMenu, onSearch, onTour }: { onMenu: () => void; onSearch: ()
           )}
         </div>
         <div className="relative">
-          <button className="ml-1 flex items-center gap-2 rounded-xl p-1 pr-2 hover:bg-slate-100 dark:hover:bg-white/5" onClick={() => setMenu(menu === 'u' ? null : 'u')} aria-label="Conta">
+          <button className="ml-1 flex items-center gap-2 rounded-xl p-1 pr-2 hover:bg-slate-100 dark:hover:bg-white/5" onClick={() => setMenu(menu === 'u' ? null : 'u')} aria-label="Menu da conta" aria-expanded={menu === 'u'}>
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-500 text-xs font-semibold text-white">{initials}</span>
             <span className="hidden text-left leading-tight xl:block">
               <span className="block text-xs font-medium">{user?.name}</span>
               <span className="block text-[11px] text-slate-500">{user?.role === 'visitor' ? 'Visitante' : 'Administrador'}</span>
             </span>
+            <ChevronDown size={14} className="hidden text-slate-400 xl:block" />
           </button>
           {menu === 'u' && (
-            <div className={clsx(pop, 'w-60 p-1.5')}>
-              <div className="px-3 py-2 text-xs text-slate-500">{user?.role === 'visitor' ? 'Sessão de visitante' : user?.email}</div>
-              <button className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-white/5" onClick={() => { setMenu(null); nav('/settings') }}><Settings size={15} /> Configurações</button>
-              <button className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-bad hover:bg-red-50 dark:hover:bg-red-500/10" onClick={logout}><LogOut size={15} /> Sair</button>
+            <div className={clsx(pop, 'w-72 p-1.5')} role="menu">
+              <div className="flex items-center gap-3 px-3 pb-3 pt-2">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-500 text-sm font-semibold text-white">{initials}</span>
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-semibold">{user?.name}</div>
+                  <div className="truncate text-xs text-slate-500">{user?.role === 'visitor' ? 'Sessão de visitante' : user?.email}</div>
+                </div>
+              </div>
+              <div className="border-t border-slate-100 py-1.5 dark:border-white/10">
+                <button className={item} onClick={() => { setMenu(null); setAccount(true) }}><UserRound size={16} /> Minha conta</button>
+                <button className={item} onClick={() => go('/settings?tab=rules')}><Target size={16} /> Metas e limites</button>
+                <button className={item} onClick={() => go('/settings?tab=score')}><Gauge size={16} /> Campaign Score</button>
+                <button className={item} onClick={() => go('/settings?tab=integrations')}><Plug size={16} /> Integrações</button>
+              </div>
+              <div className="border-t border-slate-100 py-1.5 dark:border-white/10">
+                <button className={item} onClick={() => go('/automation')}><Workflow size={16} /> Automações<span className="ml-auto text-xs text-slate-500">{workflows.filter((w) => w.status === 'active').length} ativas{errors ? `, ${errors} com erro` : ''}</span></button>
+                <button className={item} onClick={() => go('/import')}><Upload size={16} /> Importar dados</button>
+                <button className={item} onClick={() => go('/settings?tab=users')}><Users size={16} /> Usuários e acesso</button>
+                <button className={item} onClick={toggleTheme}>{dark ? <Sun size={16} /> : <Moon size={16} />} Tema {dark ? 'claro' : 'escuro'}</button>
+              </div>
+              <div className="border-t border-slate-100 py-1.5 dark:border-white/10">
+                <button className={item} onClick={() => go('/settings?tab=data')}><RotateCcw size={16} /> Restaurar dados de exemplo</button>
+                <button className={clsx(item, '!text-bad hover:!bg-red-50 dark:hover:!bg-red-500/10')} onClick={logout}><LogOut size={16} /> Sair</button>
+              </div>
             </div>
           )}
         </div>
       </div>
+      <AccountModal open={account} onClose={() => setAccount(false)} />
     </header>
   )
 }

@@ -7,7 +7,6 @@ import { Badge, Card, DataTable, EmptyState, Modal, PageHeader, Segmented, toast
 import type { Campaign, DailyMetric } from '../data/types'
 import { dateTimeBR, money, num } from '../lib/format'
 import { isoDate } from '../data/seed'
-import { PageGuide } from '../components/didactic'
 
 const FIELDS = [
   { key: 'date', label: 'Data', required: true, syn: ['date', 'data', 'dia', 'day'] },
@@ -212,7 +211,6 @@ export default function DataImport() {
   return (
     <>
       <PageHeader title="Importar dados" description="Importe dados de campanhas via CSV com mapeamento de colunas, validação, detecção de duplicidades e confirmação. A arquitetura está preparada para conectores de API." actions={<button className="btn-secondary" onClick={sampleCsv}><Download size={14} /> CSV de exemplo</button>} />
-      <PageGuide id="import" />
       <div className="mb-4 flex items-center gap-2 text-xs">
         {['Upload', 'Mapeamento', 'Validação', 'Confirmação'].map((l, i) => (
           <div key={l} className="flex items-center gap-2">

@@ -8,7 +8,6 @@ import { Legend, makeTip, useChartTheme } from '../components/charts'
 import { derive, sum } from '../lib/metrics'
 import { addDays, between, channelStats } from '../lib/query'
 import { money, num, percent, ratio, signedPct } from '../lib/format'
-import { PageGuide } from '../components/didactic'
 
 interface Proj {
   spend: number
@@ -106,7 +105,6 @@ export default function Simulator() {
         badge={<Badge tone="purple" icon={<FlaskConical size={11} />}>Simulação</Badge>}
         actions={<><button className="btn-secondary" onClick={() => setAlloc(baseAlloc)}><RotateCcw size={14} /> Restaurar real</button><button className="btn-ai" onClick={optimize}>Sugerir redistribuição</button><button className="btn-primary" onClick={() => setApplyOpen(true)}><Lock size={14} /> Aplicar nas plataformas</button></>}
       />
-      <PageGuide id="simulator" />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         {kpi('Investimento total', proj.tot.inv, real.tot.inv, (v) => money(v, { compact: true }), false)}
         {kpi('Leads', proj.tot.leads, real.tot.leads, (v) => num(v), true)}
@@ -220,7 +218,7 @@ export default function Simulator() {
             <li>Confirmar explicitamente a alteração — o backend registra quem aprovou e o valor anterior para rollback.</li>
           </ol>
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
-            Status: integração com plataformas de anúncios <b>não configurada</b> (modo demonstração). {can('admin') ? '' : 'Seu perfil também não tem permissão para aplicar.'}
+            Status: integração com plataformas de anúncios <b>não configurada</b>. {can('admin') ? '' : 'Seu perfil também não tem permissão para aplicar.'}
           </div>
           <div className="text-xs">
             <div className="mb-1 font-medium">Alterações que seriam enviadas</div>

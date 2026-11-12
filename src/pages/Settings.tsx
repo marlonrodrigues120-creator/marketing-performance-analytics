@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import clsx from 'clsx'
 import { CheckCircle2, KeyRound, Loader2, Plug, RotateCcw, Save, Shield, Target, Users } from 'lucide-react'
 import { useStore } from '../store/AppStore'
@@ -11,7 +12,10 @@ type Tab = 'rules' | 'score' | 'integrations' | 'users' | 'data'
 
 export default function Settings() {
   const s = useStore()
-  const [tab, setTab] = useState<Tab>(() => (location.hash.includes('#score') ? 'score' : location.hash.includes('#integrations') ? 'integrations' : 'rules'))
+  const [params] = useSearchParams()
+  const fromParam = (): Tab => (['rules', 'score', 'integrations', 'users', 'data'].includes(params.get('tab') ?? '') ? (params.get('tab') as Tab) : location.hash.includes('#score') ? 'score' : location.hash.includes('#integrations') ? 'integrations' : 'rules')
+  const [tab, setTab] = useState<Tab>(fromParam)
+  useEffect(() => { if (params.get('tab')) setTab(fromParam()) }, [params]) // eslint-disable-line react-hooks/exhaustive-deps
   const [draft, setDraft] = useState<S>(s.settings)
   const [resetOpen, setResetOpen] = useState(false)
   useEffect(() => { setDraft(s.settings) }, [s.settings])
@@ -64,7 +68,7 @@ export default function Settings() {
               <Field label="Margem bruta (%)" hint="ROI = ((receita × margem − investimento total) ÷ investimento total) × 100. Receita não é lucro." error={errors.grossMargin}>
                 <input className="input" type="number" min={1} max={100} value={Math.round(draft.grossMargin * 1000) / 10} onChange={(e) => setDraft({ ...draft, grossMargin: num(e.target.value) / 100 })} />
               </Field>
-              <Field label="Modelo de atribuição" hint="A base demonstrativa foi gerada com last-click. Outros modelos exigem dados de jornada (GA4/CRM) e são recalculados no backend.">
+              <Field label="Modelo de atribuição" hint="A base de exemplo usa last-click. Outros modelos exigem dados de jornada (GA4/CRM) e são recalculados no backend.">
                 <select className="input dark:[color-scheme:dark]" value={draft.attributionModel} onChange={(e) => setDraft({ ...draft, attributionModel: e.target.value as S['attributionModel'] })}>
                   <option value="last-click">Last-click (último clique)</option>
                   <option value="first-click" disabled>First-click — requer backend + GA4</option>
@@ -137,10 +141,10 @@ export default function Settings() {
       )}
 
       {tab === 'data' && (
-        <Card title="Dados demonstrativos" subtitle="Restaura a base fictícia e o estado inicial de workflows, execuções, importações e configurações">
+        <Card title="Dados de exemplo" subtitle="Restaura a base de exemplo e o estado inicial de workflows, execuções, importações e configurações">
           <p className="text-sm muted">A base possui 12 meses de dados diários para {s.campaigns.length} campanhas em {s.channels.length} canais, gerada de forma determinística. Tudo o que você criar fica salvo apenas neste navegador.</p>
-          <button className="btn-danger mt-4" disabled={!admin} onClick={() => setResetOpen(true)}><RotateCcw size={14} /> Restaurar dados de demonstração</button>
-          <Modal open={resetOpen} onClose={() => setResetOpen(false)} title="Restaurar demonstração" size="sm" footer={<><button className="btn-secondary" onClick={() => setResetOpen(false)}>Cancelar</button><button className="btn-danger" onClick={s.resetDemo}>Restaurar</button></>}>
+          <button className="btn-danger mt-4" disabled={!admin} onClick={() => setResetOpen(true)}><RotateCcw size={14} /> Restaurar dados de exemplo</button>
+          <Modal open={resetOpen} onClose={() => setResetOpen(false)} title="Restaurar dados de exemplo" size="sm" footer={<><button className="btn-secondary" onClick={() => setResetOpen(false)}>Cancelar</button><button className="btn-danger" onClick={s.resetDemo}>Restaurar</button></>}>
             <p className="text-sm">Workflows criados, histórico, importações, cenários e configurações voltarão ao estado inicial. Continuar?</p>
           </Modal>
         </Card>
@@ -169,7 +173,7 @@ function Integrations({ draft, setDraft, admin, apiError }: { draft: S; setDraft
   }
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <Card title={<span className="flex items-center gap-1.5"><Plug size={15} /> Backend (FastAPI)</span>} subtitle="Opcional. Sem backend, a aplicação roda em modo demonstração com dados locais.">
+      <Card title={<span className="flex items-center gap-1.5"><Plug size={15} /> Backend (FastAPI)</span>} subtitle="Opcional. Sem backend, a aplicação roda em modo localstração com dados locais.">
         <fieldset disabled={!admin} className="space-y-3">
           <Field label="URL da API" hint="Ex.: http://localhost:8000 — o frontend nunca recebe tokens do n8n ou da OpenAI." error={apiError}>
             <input className="input" placeholder="http://localhost:8000" value={draft.integrations.apiBaseUrl} onChange={(e) => setDraft({ ...draft, integrations: { ...draft.integrations, apiBaseUrl: e.target.value.trim() } })} />
@@ -197,7 +201,7 @@ function Integrations({ draft, setDraft, admin, apiError }: { draft: S; setDraft
         <ol className="list-decimal space-y-1.5 pl-5 text-xs leading-relaxed">
           <li>Na raiz do repositório: <code>cp backend/.env.example backend/.env</code> e preencha as variáveis.</li>
           <li>Suba tudo com <code>docker compose up -d</code> (PostgreSQL, API FastAPI em :8000 e n8n em :5678).</li>
-          <li>Rode <code>docker compose exec api python -m app.seed</code> para carregar a base demonstrativa no PostgreSQL.</li>
+          <li>Rode <code>docker compose exec api python -m app.seed</code> para carregar a base de exemplo no PostgreSQL.</li>
           <li>Importe os workflows de <code>n8n/workflows/*.json</code> no n8n e configure as credenciais de SMTP/Slack lá.</li>
           <li>Informe a URL da API acima e clique em “Testar conexão”. Com o n8n respondendo, as execuções passam a ser feitas por ele.</li>
         </ol>

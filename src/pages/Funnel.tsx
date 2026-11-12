@@ -3,13 +3,12 @@ import clsx from 'clsx'
 import { AlertTriangle, ArrowDown, CheckCircle2 } from 'lucide-react'
 import { useAnalytics } from '../store/useAnalytics'
 import { useStore } from '../store/AppStore'
-import { Badge, Card, DemoBadge, EmptyState, InfoTip, PageHeader } from '../components/ui'
+import { Badge, Card, EmptyState, InfoTip, PageHeader } from '../components/ui'
 import { useChartTheme } from '../components/charts'
 import { sum } from '../lib/metrics'
 import type { Totals } from '../data/types'
 import { num, percent, signedPct } from '../lib/format'
 import { groupBy } from '../lib/metrics'
-import { PageGuide } from '../components/didactic'
 
 const STAGES = [
   { key: 'impressions', label: 'Impressions', pt: 'Impressões' },
@@ -79,7 +78,7 @@ export default function Funnel() {
       <PageHeader
         title="Funil de conversão"
         description="Funil de aquisição da impressão ao cliente. Os gargalos são detectados comparando cada taxa com referências de mercado e com o período anterior."
-        badge={<DemoBadge />}
+       
         actions={
           <select className="input w-auto text-xs dark:[color-scheme:dark]" value={scope} onChange={(e) => setScope(e.target.value)} aria-label="Escopo do funil">
             <option value="all">Todos os canais e campanhas (filtros globais)</option>
@@ -88,7 +87,6 @@ export default function Funnel() {
           </select>
         }
       />
-      <PageGuide id="funnel" />
       {!scopedRows.cur.length ? (
         <div className="card"><EmptyState title="Sem dados para este escopo no período" /></div>
       ) : (

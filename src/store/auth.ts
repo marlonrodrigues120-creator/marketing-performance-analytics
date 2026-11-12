@@ -83,3 +83,21 @@ export async function resetPassword(email: string, code: string, password: strin
   save(accounts)
   sessionStorage.removeItem(RESET_KEY)
 }
+
+export function renameAccount(email: string, name: string) {
+  const accounts = load()
+  const acc = accounts.find((a) => a.email === normEmail(email))
+  if (!acc) throw new Error('Conta não encontrada.')
+  acc.name = name.trim()
+  save(accounts)
+}
+
+export async function changePassword(email: string, current: string, next: string) {
+  const accounts = load()
+  const acc = accounts.find((a) => a.email === normEmail(email))
+  if (!acc || (await derive(current, unb64(acc.salt))) !== acc.hash) throw new Error('A senha atual está incorreta.')
+  const salt = crypto.getRandomValues(new Uint8Array(16))
+  acc.salt = b64(salt)
+  acc.hash = await derive(next, salt)
+  save(accounts)
+}

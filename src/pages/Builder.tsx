@@ -3,14 +3,14 @@ import { Link, useNavigate, useParams, useBlocker } from 'react-router-dom'
 import { addEdge, Background, Controls, Handle, MiniMap, Position, ReactFlow, ReactFlowProvider, useEdgesState, useNodesState, useReactFlow, MarkerType, type Connection, type Edge, type Node, type NodeProps } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import clsx from 'clsx'
-import { AlertTriangle, ArrowDownRight, ArrowLeft, Bell, CheckCircle2, Circle, CircleSlash, Clock, FileText, GitBranch, Loader2, Mail, Megaphone, MessageSquare, Pause, PencilLine, Play, Plus, Save, ScrollText, Sparkles, Trash2, TrendingDown, TrendingUp, Upload, UserPlus, Wallet, Webhook, XCircle, Zap, type LucideIcon } from 'lucide-react'
+import { AlertTriangle, ArrowDownRight, ArrowLeft, Bell, LayoutList, CheckCircle2, Circle, CircleSlash, Clock, FileText, GitBranch, Loader2, Mail, Megaphone, MessageSquare, Pause, PencilLine, Play, Plus, Save, ScrollText, Sparkles, Trash2, TrendingDown, TrendingUp, Upload, UserPlus, Wallet, Webhook, XCircle, Zap, type LucideIcon } from 'lucide-react'
 
 const ICONS: Record<string, LucideIcon> = { AlertTriangle, ArrowDownRight, Bell, Clock, FileText, GitBranch, Mail, Megaphone, MessageSquare, PencilLine, ScrollText, Sparkles, TrendingDown, TrendingUp, Upload, UserPlus, Wallet, Webhook, Zap }
 import { useStore } from '../store/AppStore'
 import { Badge, EmptyState, Field, toast } from '../components/ui'
 import ExecutionDetail from '../components/ExecutionDetail'
 import { useIsDark } from '../components/charts'
-import { ACTIONS, CONDITION, defOf, makeNode, METRIC_LABELS, OPERATORS, TRIGGERS, uid, type NodeDef } from '../automation/catalog'
+import { ACTIONS, CONDITION, defOf, layoutVertical, makeNode, METRIC_LABELS, OPERATORS, TRIGGERS, uid, type NodeDef } from '../automation/catalog'
 import { validateWorkflow } from '../automation/engine'
 import type { ConditionMetric, ConditionRule, Execution, Operator, WfNodeData, Workflow } from '../automation/types'
 
@@ -41,8 +41,8 @@ function WfNodeView({ data, selected }: NodeProps<FNode>) {
   const def = defOf(data.type as string)
   const run = data.runStatus as 'success' | 'error' | 'skipped' | undefined
   return (
-    <div className={clsx('w-[220px] overflow-hidden rounded-xl border bg-white shadow-sm transition dark:bg-[#121a38]', selected ? 'border-brand-400 ring-2 ring-brand-400/30' : 'border-slate-200 dark:border-white/10', run === 'success' && 'ring-2 ring-emerald-400/60', run === 'error' && 'ring-2 ring-red-400/70', run === 'skipped' && 'opacity-60')}>
-      <div className={clsx('h-1', st.bar)} />
+    <div className={clsx('relative w-[220px] rounded-xl border bg-white shadow-sm transition dark:bg-[#121a38]', selected ? 'border-brand-400 ring-2 ring-brand-400/30' : 'border-slate-200 dark:border-white/10', run === 'success' && 'ring-2 ring-emerald-400/60', run === 'error' && 'ring-2 ring-red-400/70', run === 'skipped' && 'opacity-60')}>
+      <div className={clsx('h-1 rounded-t-xl', st.bar)} />
       <div className="p-3">
         <div className="flex items-center gap-2">
           <span className={clsx('rounded-md p-1.5', st.chip)}><Icon name={def?.icon ?? 'Circle'} size={14} /></span>
@@ -56,16 +56,16 @@ function WfNodeView({ data, selected }: NodeProps<FNode>) {
         </div>
         <div className="mt-2 line-clamp-2 text-[10px] leading-snug muted">{summary(data)}</div>
       </div>
-      {data.kind !== 'trigger' && <Handle type="target" position={Position.Left} className="!h-3 !w-3 !border-2 !border-white !bg-slate-400 dark:!border-[#121a38]" />}
+      {data.kind !== 'trigger' && <Handle type="target" position={Position.Top} className="!h-3 !w-3 !border-2 !border-white !bg-slate-400 dark:!border-[#121a38]" />}
       {data.kind === 'condition' ? (
         <>
-          <Handle id="true" type="source" position={Position.Right} style={{ top: '35%' }} className="!h-3 !w-3 !border-2 !border-white !bg-emerald-500 dark:!border-[#121a38]" />
-          <Handle id="false" type="source" position={Position.Right} style={{ top: '75%' }} className="!h-3 !w-3 !border-2 !border-white !bg-red-500 dark:!border-[#121a38]" />
-          <span className="absolute right-3 top-[28%] text-[8px] font-bold text-emerald-600">SIM</span>
-          <span className="absolute right-3 top-[68%] text-[8px] font-bold text-red-500">NÃO</span>
+          <Handle id="true" type="source" position={Position.Bottom} style={{ left: '30%' }} className="!h-3 !w-3 !border-2 !border-white !bg-emerald-500 dark:!border-[#121a38]" />
+          <Handle id="false" type="source" position={Position.Bottom} style={{ left: '70%' }} className="!h-3 !w-3 !border-2 !border-white !bg-red-500 dark:!border-[#121a38]" />
+          <span className="absolute -bottom-5 left-[30%] -translate-x-1/2 text-[9px] font-semibold text-emerald-600">Sim</span>
+          <span className="absolute -bottom-5 left-[70%] -translate-x-1/2 text-[9px] font-semibold text-red-500">Não</span>
         </>
       ) : (
-        <Handle type="source" position={Position.Right} className="!h-3 !w-3 !border-2 !border-white !bg-brand-500 dark:!border-[#121a38]" />
+        <Handle type="source" position={Position.Bottom} className="!h-3 !w-3 !border-2 !border-white !bg-brand-500 dark:!border-[#121a38]" />
       )}
     </div>
   )
@@ -132,8 +132,8 @@ function BuilderInner() {
   const add = (def: NodeDef, pos?: { x: number; y: number }) => {
     if (readOnly) return
     if (def.kind === 'trigger' && nodes.some((n) => n.data.kind === 'trigger')) return toast.error('Cada workflow tem apenas um gatilho. Remova o atual para trocar.')
-    const last = [...nodes].sort((a, b) => b.position.x - a.position.x)[0]
-    const position = pos ?? (last ? { x: last.position.x + 270, y: last.position.y } : { x: 60, y: 140 })
+    const last = [...nodes].sort((a, b) => b.position.y - a.position.y)[0]
+    const position = pos ?? (last ? { x: last.position.x, y: last.position.y + 170 } : { x: -110, y: 0 })
     const n = makeNode(def.type, position)
     setNodes((ns) => [...ns.map((x) => ({ ...x, selected: false })), { id: n.id, type: 'wf', position: n.position, data: n.data, selected: true }])
     // conecta automaticamente ao último nó, quando faz sentido
@@ -217,6 +217,7 @@ function BuilderInner() {
         <Badge tone={meta.status === 'active' ? 'green' : meta.status === 'paused' ? 'amber' : 'gray'}>{meta.status === 'active' ? 'Ativo' : meta.status === 'paused' ? 'Pausado' : 'Rascunho'}</Badge>
         {dirty && <Badge tone="blue">Alterações não salvas</Badge>}
         <button className="btn-secondary btn-sm" onClick={test} disabled={running || !nodes.length}>{running ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />} Testar</button>
+        <button className="btn-ghost btn-sm" onClick={() => { setNodes((ns) => layoutVertical(ns, edges)); mark(); setTimeout(() => rf.fitView({ padding: 0.15, maxZoom: 1, duration: 300 }), 30) }} disabled={!nodes.length}><LayoutList size={13} /> Organizar</button>
         {lastExec && <button className="btn-ghost btn-sm" onClick={() => setShowExec(true)}>Ver resultado do teste</button>}
         {meta.status === 'active' ? <button className="btn-secondary btn-sm" onClick={() => save('paused')} disabled={readOnly}><Pause size={13} /> Pausar</button> : <button className="btn-secondary btn-sm" onClick={() => save('active')} disabled={readOnly}><Play size={13} /> Ativar</button>}
         <button className="btn-primary btn-sm" onClick={() => save()} disabled={readOnly}><Save size={13} /> Salvar</button>
@@ -237,7 +238,7 @@ function BuilderInner() {
               </div>
             </div>
           ))}
-          <p className="text-[10px] leading-relaxed muted">Clique para adicionar (conecta ao último nó) ou arraste para o canvas. Ligue a saída (direita) de um nó à entrada (esquerda) de outro. Selecione um nó ou conexão e pressione Backspace para remover.</p>
+          <p className="text-[10px] leading-relaxed muted">Clique para adicionar (conecta ao último nó) ou arraste para o canvas. O fluxo corre de cima para baixo: ligue a saída (embaixo) de um nó à entrada (em cima) do próximo. Selecione um nó ou conexão e pressione Backspace para remover.</p>
         </aside>
         <div className="relative min-w-0 flex-1" ref={wrapper} onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }} onDrop={onDrop}>
           <ReactFlow
@@ -254,7 +255,7 @@ function BuilderInner() {
             nodesConnectable={!readOnly}
             deleteKeyCode={readOnly ? null : ['Backspace', 'Delete']}
             fitView
-            fitViewOptions={{ padding: 0.12, maxZoom: 1.1 }}
+            fitViewOptions={{ padding: 0.15, maxZoom: 1 }}
             colorMode={dark ? 'dark' : 'light'}
             proOptions={{ hideAttribution: true }}
           >

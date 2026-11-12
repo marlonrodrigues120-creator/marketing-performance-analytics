@@ -4,13 +4,12 @@ import clsx from 'clsx'
 import { Calculator, Scale } from 'lucide-react'
 import { useAnalytics } from '../store/useAnalytics'
 import { useStore } from '../store/AppStore'
-import { Card, DataTable, DemoBadge, EmptyState, PageHeader, Segmented, type Column } from '../components/ui'
+import { Card, DataTable, EmptyState, PageHeader, Segmented, type Column } from '../components/ui'
 import { ChartTip, KpiCard, useChartTheme } from '../components/charts'
 import { campaignStats, channelStats } from '../lib/query'
 import { getKpi, type KpiKey } from '../lib/kpis'
 import { money, num, percent, ratio } from '../lib/format'
 import type { Derived } from '../data/types'
-import { PageGuide } from '../components/didactic'
 
 const CARDS: KpiKey[] = ['investment', 'revenue', 'profit', 'roi', 'roas', 'cac', 'cpl', 'aov', 'otherCost', 'revPerCustomer']
 
@@ -75,8 +74,7 @@ export default function Financial() {
 
   return (
     <>
-      <PageHeader title="Análise financeira" description="Rentabilidade dos investimentos em marketing. Receita não é tratada como lucro: o ROI usa o lucro bruto (receita × margem bruta configurada) contra o investimento total." badge={<DemoBadge />} />
-      <PageGuide id="financial" />
+      <PageHeader title="Análise financeira" description="Rentabilidade dos investimentos em marketing. Receita não é tratada como lucro: o ROI usa o lucro bruto (receita × margem bruta configurada) contra o investimento total." />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
         {CARDS.map((k) => <KpiCard key={k} k={k} value={getKpi(d, k)} prev={a.prevTotal ? getKpi(a.prevTotal, k) : null} hasPrev={a.hasPrev} compact={['investment', 'revenue', 'profit', 'otherCost'].includes(k)} d={d} />)}
       </div>

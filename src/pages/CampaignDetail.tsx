@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react'
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import clsx from 'clsx'
 import { useStore } from '../store/AppStore'
-import { Badge, Card, DemoBadge, EmptyState, PageHeader, Segmented } from '../components/ui'
+import { Badge, Card, EmptyState, PageHeader, Segmented } from '../components/ui'
 import { KpiCard, makeTip, useChartTheme } from '../components/charts'
 import { autoGranularity, InsightCard, TrendLine } from '../components/widgets'
 import { ScoreGauge } from '../components/score'
@@ -66,7 +66,7 @@ export default function CampaignDetail() {
       </Link>
       <PageHeader
         title={c.name}
-        badge={<DemoBadge />}
+       
         description={
           <span className="flex flex-wrap items-center gap-1.5">
             <Badge tone={c.status === 'Ativa' ? 'green' : c.status === 'Pausada' ? 'amber' : 'gray'}>{c.status}</Badge>
@@ -205,7 +205,7 @@ export default function CampaignDetail() {
             </Card>
           </div>
 
-          <h2 className="mb-3 mt-6 section-title">Insights específicos da campanha</h2>
+          <h2 className="mb-3 mt-6 section-title">Alertas da campanha</h2>
           {insights.length ? (
             <div className="grid gap-3 lg:grid-cols-2">{insights.map((i) => <InsightCard key={i.id} i={i} />)}</div>
           ) : (
