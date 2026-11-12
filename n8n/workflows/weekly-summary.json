@@ -1,0 +1,403 @@
+{
+  "name": "MPA — Weekly Performance Summary",
+  "nodes": [
+    {
+      "id": "3ee29d0b-1ef4-5cc1-9670-c15c3e1f0c41",
+      "name": "Agendamento",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0aa050ca-5389-5778-a3a3-fc2db510e9e3",
+      "name": "Disparo pela API",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        200
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "mpa/weekly-summary",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "webhookId": "f1c81bd7-1e6c-5ac1-a095-fa28e3040c40"
+    },
+    {
+      "id": "0a0bff39-3c40-53a5-a41c-651f0a5a11d7",
+      "name": "Validar assinatura",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        200
+      ],
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\nconst h = $json.headers; const raw = JSON.stringify($json.body);\nconst expected = 'sha256=' + crypto.createHmac('sha256', $env.N8N_WEBHOOK_SECRET).update(h['x-mpa-timestamp'] + '.' + raw).digest('hex');\nif (Math.abs(Date.now() / 1000 - Number(h['x-mpa-timestamp'])) > 300 || expected !== h['x-mpa-signature']) throw new Error('Assinatura inválida');\nreturn [{ json: $json }];"
+      }
+    },
+    {
+      "id": "c14e5aae-e139-5409-ba01-3a37fc4470bf",
+      "name": "Assinar consulta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        100
+      ],
+      "parameters": {
+        "jsCode": "// Assina a requisição para a API (HMAC-SHA256 de \"<timestamp>.<body>\")\nconst crypto = require('crypto');\nconst ts = Math.floor(Date.now() / 1000).toString();\nconst body = '';\nconst sig = 'sha256=' + crypto.createHmac('sha256', $env.N8N_WEBHOOK_SECRET).update(ts + '.' + body).digest('hex');\nconst input = $input.first().json;\nconst days = Number($json.lookbackDays ?? 7);\nconst end = new Date(Date.now() - 86400000).toISOString().slice(0, 10);\nconst start = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);\nreturn [{ json: { ...input, ts, sig, start, end, executionId: input.body?.executionId ?? null } }];"
+      }
+    },
+    {
+      "id": "0d4508ee-82a6-5fdf-8600-c94a94a19aac",
+      "name": "Consultar KPIs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        100
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.MPA_API_URL}}/api/webhooks/n8n/data",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "start",
+              "value": "={{$json.start}}"
+            },
+            {
+              "name": "end",
+              "value": "={{$json.end}}"
+            },
+            {
+              "name": "group_by",
+              "value": "channel"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-MPA-Timestamp",
+              "value": "={{$json.ts}}"
+            },
+            {
+              "name": "X-MPA-Signature",
+              "value": "={{$json.sig}}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "neverError": false
+            }
+          }
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "73186abf-e80c-5825-85b8-5d73d774ee63",
+      "name": "Avaliar condições",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        100
+      ],
+      "parameters": {
+        "jsCode": "const rows = $json.rows.filter(r => r.roi !== null).sort((a, b) => b.roi - a.roi);\nreturn [{ json: { best: rows[0], worst: rows[rows.length - 1], channels: rows } }];"
+      }
+    },
+    {
+      "id": "d5f6771e-8951-57b2-9712-01179278cbc1",
+      "name": "Há itens?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        100
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $input.all().length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "89e35a3b-46b6-5c42-b76b-215e273f958f",
+      "name": "Enviar e-mail",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1320,
+        0
+      ],
+      "parameters": {
+        "fromEmail": "={{$env.MPA_MAIL_FROM}}",
+        "toEmail": "={{$env.MPA_MAIL_TO}}",
+        "subject": "[MPA] Weekly Performance Summary",
+        "emailFormat": "text",
+        "text": "={{ JSON.stringify($input.all().map(i => i.json), null, 2) }}",
+        "options": {}
+      },
+      "credentials": {
+        "smtp": {
+          "id": "SMTP",
+          "name": "SMTP (configurar no n8n)"
+        }
+      }
+    },
+    {
+      "id": "d083eaf3-dbfb-54c6-a863-ea76f447cadc",
+      "name": "Enviar ao Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        1320,
+        200
+      ],
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{$env.MPA_SLACK_CHANNEL}}"
+        },
+        "text": "=*Weekly Performance Summary*\\n{{ $input.all().map(i => '• ' + (i.json.key ?? 'total')).join('\\n') }}",
+        "otherOptions": {}
+      },
+      "credentials": {
+        "slackApi": {
+          "id": "SLACK",
+          "name": "Slack (configurar no n8n)"
+        }
+      }
+    },
+    {
+      "id": "062008c3-1390-5332-8405-101f5683d002",
+      "name": "Assinar resultado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        100
+      ],
+      "parameters": {
+        "jsCode": "// Monta o payload de retorno e assina\nconst crypto = require('crypto');\nconst items = $('Avaliar condições').all().map(i => i.json);\nconst payload = JSON.stringify({ executionId: $('Assinar consulta').first().json.executionId, status: 'success', result: { summary: `${items.length} item(ns) processado(s)`, items }, durationMs: Date.now() - $execution.startedAt?.getTime?.() || null });\nconst ts = Math.floor(Date.now() / 1000).toString();\nconst sig = 'sha256=' + crypto.createHmac('sha256', $env.N8N_WEBHOOK_SECRET).update(ts + '.' + payload).digest('hex');\nreturn [{ json: { payload, ts, sig } }];"
+      }
+    },
+    {
+      "id": "f5d0866a-849d-5078-949e-5b81bd7821d4",
+      "name": "Registrar resultado na API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1760,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.MPA_API_URL}}/api/webhooks/n8n/execution-result",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-MPA-Timestamp",
+              "value": "={{$json.ts}}"
+            },
+            {
+              "name": "X-MPA-Signature",
+              "value": "={{$json.sig}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{$json.payload}}",
+        "options": {}
+      },
+      "retryOnFail": true,
+      "maxTries": 3
+    }
+  ],
+  "connections": {
+    "Agendamento": {
+      "main": [
+        [
+          {
+            "node": "Assinar consulta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Disparo pela API": {
+      "main": [
+        [
+          {
+            "node": "Validar assinatura",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar assinatura": {
+      "main": [
+        [
+          {
+            "node": "Assinar consulta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assinar consulta": {
+      "main": [
+        [
+          {
+            "node": "Consultar KPIs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar KPIs": {
+      "main": [
+        [
+          {
+            "node": "Avaliar condições",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Avaliar condições": {
+      "main": [
+        [
+          {
+            "node": "Há itens?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Há itens?": {
+      "main": [
+        [
+          {
+            "node": "Enviar e-mail",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Enviar ao Slack",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Assinar resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar e-mail": {
+      "main": [
+        [
+          {
+            "node": "Assinar resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar ao Slack": {
+      "main": [
+        [
+          {
+            "node": "Assinar resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assinar resultado": {
+      "main": [
+        [
+          {
+            "node": "Registrar resultado na API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "errorWorkflow": ""
+  },
+  "tags": [
+    {
+      "name": "marketing-performance"
+    }
+  ],
+  "meta": {
+    "templateId": "weekly-summary"
+  }
+}

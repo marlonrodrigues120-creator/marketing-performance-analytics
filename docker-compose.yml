@@ -1,0 +1,49 @@
+# Ambiente completo: PostgreSQL + API FastAPI + n8n.
+# 1) cp backend/.env.example backend/.env   2) docker compose up -d
+# 3) docker compose exec api python -m app.seed
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: mpa
+      POSTGRES_PASSWORD: mpa
+      POSTGRES_DB: mpa
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    ports: ["5432:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mpa"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: ./backend
+    env_file: ./backend/.env
+    depends_on:
+      db: { condition: service_healthy }
+    ports: ["8000:8000"]
+
+  n8n:
+    image: n8nio/n8n:latest
+    environment:
+      N8N_HOST: localhost
+      WEBHOOK_URL: http://localhost:5678/
+      GENERIC_TIMEZONE: America/Sao_Paulo
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+      NODE_FUNCTION_ALLOW_BUILTIN: crypto
+      MPA_API_URL: http://api:8000
+      N8N_WEBHOOK_SECRET: ${N8N_WEBHOOK_SECRET:-troque-por-outro-segredo-compartilhado-com-o-n8n}
+      MPA_CAC_LIMIT: "300"
+      MPA_ROAS_TARGET: "2.5"
+      MPA_MAIL_FROM: alertas@empresa.com
+      MPA_MAIL_TO: marketing@empresa.com
+      MPA_SLACK_CHANNEL: "#marketing-performance"
+    volumes:
+      - n8ndata:/home/node/.n8n
+      - ./n8n/workflows:/workflows:ro
+    ports: ["5678:5678"]
+
+volumes:
+  pgdata:
+  n8ndata:
