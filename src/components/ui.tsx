@@ -4,7 +4,7 @@ import { ArrowDown, ArrowUp, ArrowUpDown, Check, ChevronDown, Info, Search, X } 
 
 export function Card({ title, subtitle, actions, children, className, bodyClass, id }: { title?: ReactNode; subtitle?: ReactNode; actions?: ReactNode; children: ReactNode; className?: string; bodyClass?: string; id?: string }) {
   return (
-    <section id={id} className={clsx('card animate-fade-up', className)}>
+    <section id={id} className={clsx('card', className)}>
       {(title || actions) && (
         <header className="flex flex-wrap items-start justify-between gap-2 px-4 pt-4 sm:px-5">
           <div className="min-w-0">
@@ -24,7 +24,7 @@ export function PageHeader({ title, description, actions, badge }: { title: stri
     <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
       <div>
         <div className="flex items-center gap-2">
-          <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{title}</h1>
+          <h1 className="text-2xl font-semibold tracking-[-0.02em] sm:text-[28px]">{title}</h1>
           {badge}
         </div>
         {description && <p className="mt-1 max-w-3xl text-sm muted">{description}</p>}
@@ -42,7 +42,7 @@ export function InfoTip({ text, className }: { text: ReactNode; className?: stri
         <Info size={13} />
       </button>
       {open && (
-        <span role="tooltip" className="absolute left-1/2 top-5 z-50 w-64 -translate-x-1/2 rounded-lg border border-slate-200 bg-white p-2.5 text-xs font-normal leading-relaxed text-slate-600 shadow-lg dark:border-white/10 dark:bg-[#1a2030] dark:text-slate-300">
+        <span role="tooltip" className="absolute left-1/2 top-5 z-50 w-64 -translate-x-1/2 rounded-lg border border-slate-200 bg-white p-2.5 text-xs font-normal leading-relaxed text-slate-600 shadow-lg dark:border-white/10 dark:bg-[#141c3c] dark:text-slate-300">
           {text}
         </span>
       )}
@@ -132,7 +132,7 @@ export function MultiSelect({ label, options, value, onChange, placeholder = 'To
         )}
       </button>
       {open && (
-        <div className={clsx('absolute left-0 top-full z-40 mt-1 rounded-lg border border-slate-200 bg-white p-1 shadow-xl dark:border-white/10 dark:bg-[#1a2030]', width)}>
+        <div className={clsx('absolute left-0 top-full z-40 mt-1 rounded-lg border border-slate-200 bg-white p-1 shadow-xl dark:border-white/10 dark:bg-[#141c3c]', width)}>
           {options.length > 6 && (
             <div className="relative mb-1">
               <Search size={13} className="absolute left-2 top-2 text-slate-400" />
@@ -173,7 +173,7 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: {
   if (!open) return null
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-900/40 p-0 backdrop-blur-[2px] sm:items-center sm:p-4" onMouseDown={onClose}>
-      <div role="dialog" aria-modal="true" className={clsx('card flex max-h-[92vh] w-full flex-col animate-fade-up rounded-b-none sm:rounded-xl', { sm: 'sm:max-w-md', md: 'sm:max-w-xl', lg: 'sm:max-w-3xl', xl: 'sm:max-w-5xl' }[size])} onMouseDown={(e) => e.stopPropagation()}>
+      <div role="dialog" aria-modal="true" className={clsx('card flex max-h-[92vh] w-full flex-col rounded-b-none sm:rounded-xl', { sm: 'sm:max-w-md', md: 'sm:max-w-xl', lg: 'sm:max-w-3xl', xl: 'sm:max-w-5xl' }[size])} onMouseDown={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5 dark:border-white/10">
           <h2 className="text-base font-semibold">{title}</h2>
           <button className="btn-ghost p-1.5" onClick={onClose} aria-label="Fechar">
@@ -270,7 +270,7 @@ export function DataTable<T>({ rows, columns, rowKey, search, searchPlaceholder 
               {columns.map((c) => {
                 const active = sort?.key === c.key
                 return (
-                  <th key={c.key} className={clsx('th border-b border-slate-100 bg-slate-50/80 first:pl-4 last:pr-4 dark:border-white/5 dark:bg-white/[0.02] sm:first:pl-5 sm:last:pr-5', c.align === 'right' && 'text-right', c.align === 'center' && 'text-center', c.sticky && 'sticky left-0 z-10 bg-slate-50 dark:bg-[#151b27]')}>
+                  <th key={c.key} className={clsx('th border-b border-slate-100 bg-slate-50/80 first:pl-4 last:pr-4 dark:border-white/5 dark:bg-white/[0.02] sm:first:pl-5 sm:last:pr-5', c.align === 'right' && 'text-right', c.align === 'center' && 'text-center', c.sticky && 'sticky left-0 z-10 bg-slate-50 dark:bg-[#111936]')}>
                     {c.sortable !== false && c.value ? (
                       <button className={clsx('inline-flex items-center gap-1 uppercase hover:text-slate-800 dark:hover:text-slate-200', active && 'text-brand-600 dark:text-brand-300')} onClick={() => setSort(active ? { key: c.key, dir: sort!.dir === 'desc' ? 'asc' : 'desc' } : { key: c.key, dir: 'desc' })}>
                         {c.header}
@@ -288,7 +288,7 @@ export function DataTable<T>({ rows, columns, rowKey, search, searchPlaceholder 
             {view.map((r) => (
               <tr key={rowKey(r)} onClick={onRowClick ? () => onRowClick(r) : undefined} className={clsx('group transition-colors', onRowClick && 'cursor-pointer', 'hover:bg-slate-50 dark:hover:bg-white/[0.03]')}>
                 {columns.map((c) => (
-                  <td key={c.key} className={clsx('td border-b border-slate-100 first:pl-4 last:pr-4 dark:border-white/5 sm:first:pl-5 sm:last:pr-5', dense && 'py-2', c.align === 'right' && 'text-right', c.align === 'center' && 'text-center', c.sticky && 'sticky left-0 z-10 bg-white group-hover:bg-slate-50 dark:bg-[#121722] dark:group-hover:bg-[#161c28]', c.className)}>
+                  <td key={c.key} className={clsx('td border-b border-slate-100 first:pl-4 last:pr-4 dark:border-white/5 sm:first:pl-5 sm:last:pr-5', dense && 'py-2', c.align === 'right' && 'text-right', c.align === 'center' && 'text-center', c.sticky && 'sticky left-0 z-10 bg-white group-hover:bg-slate-50 dark:bg-[#0d1430] dark:group-hover:bg-[#121a38]', c.className)}>
                     {c.render ? c.render(r) : String(c.value?.(r) ?? '—')}
                   </td>
                 ))}
@@ -337,7 +337,7 @@ export function Toaster() {
   return (
     <div className="pointer-events-none fixed bottom-4 right-4 z-[80] flex flex-col gap-2" aria-live="polite">
       {items.map((t) => (
-        <div key={t.id} className={clsx('pointer-events-auto flex max-w-sm items-start gap-2 rounded-lg border px-3.5 py-2.5 text-sm shadow-lg animate-fade-up', t.tone === 'success' && 'border-emerald-200 bg-white text-slate-800 dark:border-emerald-500/30 dark:bg-[#132019] dark:text-emerald-100', t.tone === 'error' && 'border-red-200 bg-white text-slate-800 dark:border-red-500/30 dark:bg-[#251416] dark:text-red-100', t.tone === 'info' && 'border-slate-200 bg-white text-slate-800 dark:border-white/10 dark:bg-[#1a2030] dark:text-slate-100')}>
+        <div key={t.id} className={clsx('pointer-events-auto flex max-w-sm items-start gap-2 rounded-lg border px-3.5 py-2.5 text-sm shadow-lg', t.tone === 'success' && 'border-emerald-200 bg-white text-slate-800 dark:border-emerald-500/30 dark:bg-[#132019] dark:text-emerald-100', t.tone === 'error' && 'border-red-200 bg-white text-slate-800 dark:border-red-500/30 dark:bg-[#251416] dark:text-red-100', t.tone === 'info' && 'border-slate-200 bg-white text-slate-800 dark:border-white/10 dark:bg-[#141c3c] dark:text-slate-100')}>
           <span className={clsx('mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full', t.tone === 'success' ? 'bg-good' : t.tone === 'error' ? 'bg-bad' : 'bg-brand-500')} />
           {t.text}
         </div>

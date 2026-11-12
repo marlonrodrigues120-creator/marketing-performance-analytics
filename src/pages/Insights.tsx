@@ -9,11 +9,15 @@ import { generateInsights, type Priority } from '../lib/insights'
 import { answer, SUGGESTIONS, type AnalystAnswer, type AnalystCtx } from '../lib/analyst'
 import { buildReport } from '../lib/report'
 import { KPIS } from '../lib/kpis'
+import { PageGuide } from '../components/didactic'
+import { useSearchParams } from 'react-router-dom'
 
 type Tab = 'insights' | 'analyst' | 'report'
 
 export default function Insights() {
-  const [tab, setTab] = useState<Tab>(() => (location.hash.includes('analyst') ? 'analyst' : 'insights'))
+  const [params] = useSearchParams()
+  const [tab, setTab] = useState<Tab>(() => (params.get('tab') === 'analyst' || params.get('ask') ? 'analyst' : 'insights'))
+  useEffect(() => { if (params.get('tab') === 'analyst' || params.get('ask')) setTab('analyst') }, [params])
   const a = useAnalytics()
   const { channels, settings } = useStore()
   const ctx: AnalystCtx = useMemo(() => ({ campaigns: a.campaigns, channels, rows: a.rows, prevRows: a.prevRows, dimRows: a.dimRows, start: a.range.start, end: a.range.end, settings }), [a, channels, settings])
@@ -21,10 +25,11 @@ export default function Insights() {
 
   return (
     <>
-      <PageHeader title="Marketing Insights" description="Recomendações estratégicas geradas a partir dos indicadores filtrados. Nenhuma métrica é inventada: todo número vem dos dados da plataforma." badge={<DemoBadge />} />
+      <PageHeader title="Insights e IA" description="Recomendações estratégicas geradas a partir dos indicadores filtrados. Nenhuma métrica é inventada: todo número vem dos dados da plataforma." badge={<DemoBadge />} />
+      <PageGuide id="insights" />
       <Tabs value={tab} onChange={setTab} tabs={[{ value: 'insights', label: 'Insights automáticos', count: insights.length }, { value: 'analyst', label: 'AI Marketing Analyst' }, { value: 'report', label: 'AI Report Generator' }]} />
       {tab === 'insights' && <InsightList insights={insights} />}
-      {tab === 'analyst' && <Analyst ctx={ctx} />}
+      {tab === 'analyst' && <Analyst ctx={ctx} initial={params.get('ask') ?? undefined} />}
       {tab === 'report' && <Report ctx={ctx} />}
     </>
   )
@@ -78,7 +83,7 @@ function Md({ text }: { text: string }) {
   return <>{parts.map((p, i) => (p.startsWith('**') ? <strong key={i} className="font-semibold text-slate-900 dark:text-white">{p.slice(2, -2)}</strong> : p))}</>
 }
 
-function Analyst({ ctx }: { ctx: AnalystCtx }) {
+function Analyst({ ctx, initial }: { ctx: AnalystCtx; initial?: string }) {
   const { settings } = useStore()
   const [msgs, setMsgs] = useState<Msg[]>([])
   const [q, setQ] = useState('')
@@ -110,6 +115,14 @@ function Analyst({ ctx }: { ctx: AnalystCtx }) {
     setThinking(false)
   }
 
+  const asked = useRef<string | null>(null)
+  useEffect(() => {
+    if (initial && asked.current !== initial) {
+      asked.current = initial
+      ask(initial)
+    }
+  }, [initial]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const submit = (e: FormEvent) => {
     e.preventDefault()
     ask(q)
@@ -131,7 +144,7 @@ function Analyst({ ctx }: { ctx: AnalystCtx }) {
               </div>
             )}
             {msgs.map((m, i) => (
-              <div key={i} className={clsx('flex gap-3 animate-fade-up', m.role === 'user' && 'flex-row-reverse')}>
+              <div key={i} className={clsx('flex gap-3', m.role === 'user' && 'flex-row-reverse')}>
                 <div className={clsx('flex h-8 w-8 shrink-0 items-center justify-center rounded-full', m.role === 'user' ? 'bg-slate-200 text-slate-600 dark:bg-white/10 dark:text-slate-300' : 'bg-ai-500 text-white')}>{m.role === 'user' ? <User size={15} /> : <Sparkles size={15} />}</div>
                 {m.role === 'user' ? (
                   <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-brand-500 px-3.5 py-2 text-sm text-white">{m.text}</div>

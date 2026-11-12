@@ -12,6 +12,7 @@ import { campaignStats, channelStats } from '../lib/query'
 import { generateInsights } from '../lib/insights'
 import { KPIS, getKpi, type KpiKey } from '../lib/kpis'
 import { money, num, percent } from '../lib/format'
+import { PageGuide, PeriodStory } from '../components/didactic'
 
 const CARDS: KpiKey[] = ['investment', 'revenue', 'cac', 'roas', 'roi', 'leads', 'customers', 'cpl', 'ctr', 'cpc']
 
@@ -48,9 +49,11 @@ export default function Overview() {
   return (
     <>
       <PageHeader title="Overview" description="Visão consolidada da performance de marketing no período e nos filtros selecionados." badge={<DemoBadge />} />
+      <PageGuide id="overview" />
+      <PeriodStory d={a.total} prev={a.prevTotal} days={a.range.days} insights={insights.length} topChannel={(() => { const c = [...chStats].filter((x) => x.d.roi !== null && x.d.investment > a.total.investment * 0.03).sort((x, y) => y.d.roi! - x.d.roi!)[0]; return c ? { name: c.channel.name, roi: c.d.roi } : undefined })()} worstCampaign={(() => { const c = [...cStats].sort((x, y) => x.d.profit - y.d.profit)[0]; return c ? { name: c.campaign.name, profit: c.d.profit } : undefined })()} />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
         {CARDS.map((k) => (
-          <KpiCard key={k} k={k} value={getKpi(a.total, k)} prev={a.prevTotal ? getKpi(a.prevTotal, k) : null} hasPrev={a.hasPrev} spark={sparkSeries.map((p) => getKpi(p, k))} compact={k === 'investment' || k === 'revenue'} sub={k === 'investment' ? `Mídia ${money(a.total.mediaSpend, { compact: true })} · outros ${money(a.total.otherCost, { compact: true })}` : undefined} />
+          <KpiCard key={k} k={k} value={getKpi(a.total, k)} prev={a.prevTotal ? getKpi(a.prevTotal, k) : null} hasPrev={a.hasPrev} spark={sparkSeries.map((p) => getKpi(p, k))} compact={k === 'investment' || k === 'revenue'} d={a.total} sub={k === 'investment' ? `Mídia ${money(a.total.mediaSpend, { compact: true })} · outros ${money(a.total.otherCost, { compact: true })}` : undefined} />
         ))}
       </div>
       {!a.hasPrev && <p className="mt-2 text-xs muted">Comparação indisponível: o período anterior equivalente está fora do histórico de dados.</p>}

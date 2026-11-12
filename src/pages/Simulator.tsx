@@ -8,6 +8,7 @@ import { Legend, makeTip, useChartTheme } from '../components/charts'
 import { derive, sum } from '../lib/metrics'
 import { addDays, between, channelStats } from '../lib/query'
 import { money, num, percent, ratio, signedPct } from '../lib/format'
+import { PageGuide } from '../components/didactic'
 
 interface Proj {
   spend: number
@@ -95,16 +96,17 @@ export default function Simulator() {
     )
   }
 
-  if (!base.paid.length) return <><PageHeader title="Budget Simulator" /><div className="card"><EmptyState title="Sem canais pagos nos últimos 30 dias" /></div></>
+  if (!base.paid.length) return <><PageHeader title="Simulador de orçamento" /><div className="card"><EmptyState title="Sem canais pagos nos últimos 30 dias" /></div></>
 
   return (
     <>
       <PageHeader
-        title="Budget Simulator"
+        title="Simulador de orçamento"
         description={<>Simule a redistribuição de mídia entre canais pagos. Base: resultados <b>reais</b> dos últimos 30 dias. Resultados simulados são <b>projeções</b> com retornos decrescentes, não resultados reais.</>}
         badge={<Badge tone="purple" icon={<FlaskConical size={11} />}>Simulação</Badge>}
         actions={<><button className="btn-secondary" onClick={() => setAlloc(baseAlloc)}><RotateCcw size={14} /> Restaurar real</button><button className="btn-ai" onClick={optimize}>Sugerir redistribuição</button><button className="btn-primary" onClick={() => setApplyOpen(true)}><Lock size={14} /> Aplicar nas plataformas</button></>}
       />
+      <PageGuide id="simulator" />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         {kpi('Investimento total', proj.tot.inv, real.tot.inv, (v) => money(v, { compact: true }), false)}
         {kpi('Leads', proj.tot.leads, real.tot.leads, (v) => num(v), true)}

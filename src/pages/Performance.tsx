@@ -9,6 +9,7 @@ import { autoGranularity, TrendLine } from '../components/widgets'
 import { timeSeries, trendSlope, type Granularity } from '../lib/metrics'
 import { KPIS, getKpi, type KpiKey } from '../lib/kpis'
 import { signedPct } from '../lib/format'
+import { PageGuide } from '../components/didactic'
 
 const METRICS: { k: KpiKey; title: string }[] = [
   { k: 'investment', title: 'Investimento' },
@@ -43,12 +44,12 @@ export default function Performance() {
     })
   }, [a, g])
 
-  if (!a.rows.length) return <><PageHeader title="Performance over Time" /><div className="card"><EmptyState title="Sem dados para os filtros selecionados" /></div></>
+  if (!a.rows.length) return <><PageHeader title="Evolução no tempo" /><div className="card"><EmptyState title="Sem dados para os filtros selecionados" /></div></>
 
   return (
     <>
       <PageHeader
-        title="Performance over Time"
+        title="Evolução no tempo"
         description="Séries temporais dos principais indicadores. A tendência é a inclinação da regressão linear, em % da média por período."
         badge={<DemoBadge />}
         actions={
@@ -58,6 +59,7 @@ export default function Performance() {
           </>
         }
       />
+      <PageGuide id="performance" />
       <div className="mb-4 flex flex-wrap gap-1.5">
         {METRICS.map((m) => {
           const on = selected.includes(m.k)

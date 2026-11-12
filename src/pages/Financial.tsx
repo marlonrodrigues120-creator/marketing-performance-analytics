@@ -10,6 +10,7 @@ import { campaignStats, channelStats } from '../lib/query'
 import { getKpi, type KpiKey } from '../lib/kpis'
 import { money, num, percent, ratio } from '../lib/format'
 import type { Derived } from '../data/types'
+import { PageGuide } from '../components/didactic'
 
 const CARDS: KpiKey[] = ['investment', 'revenue', 'profit', 'roi', 'roas', 'cac', 'cpl', 'aov', 'otherCost', 'revPerCustomer']
 
@@ -34,7 +35,7 @@ export default function Financial() {
         : campaignStats(a.campaigns, channels, a.rows, a.margin).map((s) => ({ id: s.campaign.id, name: s.campaign.name, color: s.channel.color, d: s.d, sub: s.channel.name })),
     [by, a, channels],
   )
-  if (!a.rows.length) return <><PageHeader title="Financial Analysis" /><div className="card"><EmptyState title="Sem dados para os filtros selecionados" /></div></>
+  if (!a.rows.length) return <><PageHeader title="Análise financeira" /><div className="card"><EmptyState title="Sem dados para os filtros selecionados" /></div></>
 
   const cogs = d.revenue * (1 - a.margin)
   const steps = [
@@ -74,9 +75,10 @@ export default function Financial() {
 
   return (
     <>
-      <PageHeader title="Financial Analysis" description="Rentabilidade dos investimentos em marketing. Receita não é tratada como lucro: o ROI usa o lucro bruto (receita × margem bruta configurada) contra o investimento total." badge={<DemoBadge />} />
+      <PageHeader title="Análise financeira" description="Rentabilidade dos investimentos em marketing. Receita não é tratada como lucro: o ROI usa o lucro bruto (receita × margem bruta configurada) contra o investimento total." badge={<DemoBadge />} />
+      <PageGuide id="financial" />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
-        {CARDS.map((k) => <KpiCard key={k} k={k} value={getKpi(d, k)} prev={a.prevTotal ? getKpi(a.prevTotal, k) : null} hasPrev={a.hasPrev} compact={['investment', 'revenue', 'profit', 'otherCost'].includes(k)} />)}
+        {CARDS.map((k) => <KpiCard key={k} k={k} value={getKpi(d, k)} prev={a.prevTotal ? getKpi(a.prevTotal, k) : null} hasPrev={a.hasPrev} compact={['investment', 'revenue', 'profit', 'otherCost'].includes(k)} d={d} />)}
       </div>
 
       <div className="mt-4 grid gap-4 xl:grid-cols-5">

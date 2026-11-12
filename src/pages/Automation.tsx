@@ -9,6 +9,7 @@ import { describeTrigger, defOf, METRIC_LABELS } from '../automation/catalog'
 import { TEMPLATES, workflowFromTemplate, type Template } from '../automation/templates'
 import type { ConditionRule, Execution, Workflow } from '../automation/types'
 import { dateTimeBR, percent, relTime } from '../lib/format'
+import { PageGuide } from '../components/didactic'
 
 export default function Automation() {
   const s = useStore()
@@ -81,7 +82,8 @@ export default function Automation() {
 
   return (
     <>
-      <PageHeader title="Automation Center" description="Criação, execução e monitoramento de workflows. O app guarda configurações e histórico; o n8n executa agendamentos, condições e envios via webhooks autenticados." actions={s.can('edit') && <><button className="btn-secondary" onClick={() => setTab('templates')}><Sparkles size={14} /> Usar modelo</button><button className="btn-primary" onClick={() => nav('/automation/workflows/new')}><Plus size={14} /> Criar workflow</button></>} />
+      <PageHeader title="Automações" description="Criação, execução e monitoramento de workflows. O app guarda configurações e histórico; o n8n executa agendamentos, condições e envios via webhooks autenticados." actions={s.can('edit') && <><button className="btn-secondary" onClick={() => setTab('templates')}><Sparkles size={14} /> Usar modelo</button><button className="btn-primary" onClick={() => nav('/automation/workflows/new')}><Plus size={14} /> Criar workflow</button></>} />
+      <PageGuide id="automation" />
 
       <div className={clsx('mb-4 flex flex-wrap items-center gap-3 rounded-xl border p-3 text-xs', s.settings.integrations.n8nConnected ? 'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200' : 'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200')}>
         <Plug size={16} />
@@ -102,7 +104,7 @@ export default function Automation() {
           { l: 'Taxa de sucesso', v: percent(stats.rate, 1), i: CheckCircle2 },
           { l: 'Última execução', v: relTime(stats.last?.startedAt), i: History, sub: stats.last?.workflowName },
         ].map((k) => (
-          <div key={k.l} className="card p-3.5 animate-fade-up">
+          <div key={k.l} className="card p-3.5">
             <div className="flex items-center gap-1.5 text-[11px] muted"><k.i size={12} />{k.l}</div>
             <div className={clsx('mt-1 text-xl font-semibold', k.c)}>{k.v}</div>
             {k.sub && <div className="truncate text-[10px] muted">{k.sub}</div>}
@@ -120,7 +122,7 @@ export default function Automation() {
         {tab === 'templates' && (
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             {TEMPLATES.map((t) => (
-              <div key={t.id} className="card flex flex-col p-4 animate-fade-up">
+              <div key={t.id} className="card flex flex-col p-4">
                 <div className="flex items-center gap-2">
                   <div className={clsx('rounded-lg p-2', t.ai ? 'bg-ai-50 text-ai-500 dark:bg-ai-500/15' : 'bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-300')}>{t.ai ? <Sparkles size={15} /> : <WfIcon size={15} />}</div>
                   <div className="text-sm font-semibold">{t.name}</div>

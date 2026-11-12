@@ -5,6 +5,9 @@ import { Area, AreaChart, ResponsiveContainer } from 'recharts'
 import { InfoTip } from './ui'
 import { KPIS, trendTone, type KpiKey } from '../lib/kpis'
 import { signedPct } from '../lib/format'
+import { useStore } from '../store/AppStore'
+import { plain } from '../lib/learn'
+import type { Derived } from '../data/types'
 
 export function useIsDark() {
   const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'))
@@ -45,7 +48,7 @@ export interface TipRow {
 export function ChartTip({ active, label, rows, footer }: { active?: boolean; label?: ReactNode; rows: TipRow[]; footer?: ReactNode }) {
   if (!active || !rows.length) return null
   return (
-    <div className="min-w-[160px] rounded-lg border border-slate-200 bg-white/95 px-3 py-2 text-xs shadow-lg backdrop-blur dark:border-white/10 dark:bg-[#1a2030]/95">
+    <div className="min-w-[160px] rounded-lg border border-slate-200 bg-white/95 px-3 py-2 text-xs shadow-lg backdrop-blur dark:border-white/10 dark:bg-[#141c3c]/95">
       {label && <div className="mb-1 font-medium text-slate-700 dark:text-slate-200">{label}</div>}
       {rows.map((r) => (
         <div key={r.name} className="flex items-center justify-between gap-4 py-0.5">
@@ -83,7 +86,9 @@ export function Legend({ items }: { items: { label: string; color: string; dashe
   )
 }
 
-export function KpiCard({ k, value, prev, spark, hasPrev = true, compact, sub }: { k: KpiKey; value: number | null; prev: number | null; spark?: (number | null)[]; hasPrev?: boolean; compact?: boolean; sub?: ReactNode }) {
+export function KpiCard({ k, value, prev, spark, hasPrev = true, compact, sub, d }: { k: KpiKey; value: number | null; prev: number | null; spark?: (number | null)[]; hasPrev?: boolean; compact?: boolean; sub?: ReactNode; d?: Derived }) {
+  const { didactic } = useStore()
+  const explain = didactic && d ? plain(k, d) : null
   const def = KPIS[k]
   const delta = value !== null && prev !== null && prev !== 0 ? ((value - prev) / Math.abs(prev)) * 100 : null
   const tone = trendTone(k, delta)
@@ -92,7 +97,7 @@ export function KpiCard({ k, value, prev, spark, hasPrev = true, compact, sub }:
   const data = (spark ?? []).map((v, i) => ({ i, v }))
   const id = `sp-${k}`
   return (
-    <div className="card group relative overflow-hidden p-4 transition hover:-translate-y-0.5 hover:shadow-md animate-fade-up">
+    <div className="card group relative flex flex-col overflow-hidden p-4">
       <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
         {def.label}
         <InfoTip
@@ -106,8 +111,8 @@ export function KpiCard({ k, value, prev, spark, hasPrev = true, compact, sub }:
           }
         />
       </div>
-      <div className="mt-1.5 text-[22px] font-semibold tracking-tight">{compact && def.fmtCompact ? def.fmtCompact(value) : def.fmt(value)}</div>
-      <div className="mt-1 flex items-center gap-1.5 text-xs">
+      <div className="mt-2 text-[26px] font-semibold leading-none tracking-[-0.02em] tabular">{compact && def.fmtCompact ? def.fmtCompact(value) : def.fmt(value)}</div>
+      <div className="mt-2 flex items-center gap-1.5 text-xs">
         {hasPrev && delta !== null ? (
           <span className={clsx('inline-flex items-center gap-0.5 font-medium', tone === 'good' && 'text-good-ink dark:text-good', tone === 'bad' && 'text-bad', tone === 'neutral' && 'text-slate-500')}>
             {delta > 0.5 ? <ArrowUpRight size={13} /> : delta < -0.5 ? <ArrowDownRight size={13} /> : <Minus size={13} />}
@@ -118,9 +123,10 @@ export function KpiCard({ k, value, prev, spark, hasPrev = true, compact, sub }:
         )}
         {hasPrev && prev !== null && <span className="truncate muted">vs. {compact && def.fmtCompact ? def.fmtCompact(prev) : def.fmt(prev)}</span>}
       </div>
-      {sub && <div className="mt-1 text-[11px] muted">{sub}</div>}
+      {sub && !explain && <div className="mt-1 text-[11px] muted">{sub}</div>}
+      {explain && <p className="relative z-10 mt-3 border-t border-slate-100 pt-2.5 text-[12px] leading-snug text-slate-600 dark:border-white/[0.06] dark:text-slate-300">{explain}</p>}
       {data.length > 2 && !sub && (
-        <div className="pointer-events-none absolute bottom-0 right-0 h-12 w-28 opacity-70 transition group-hover:opacity-100">
+        <div className="pointer-events-none absolute right-3 top-3 h-8 w-20">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 2, right: 0, bottom: 0, left: 0 }}>
               <defs>

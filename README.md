@@ -5,9 +5,15 @@ Plataforma SaaS de **Marketing Analytics, Marketing Intelligence e Marketing Aut
 > Projeto de portfólio. **Todos os dados exibidos são fictícios**, gerados de forma determinística (12 meses, 19 campanhas, 11 canais).
 
 **Demo:** https://marlonrodrigues120-creator.github.io/marketing-performance-analytics/
-Contas de demonstração (senha `demo123`): `admin@demo.com` (administrador) · `analista@demo.com` (analista) · `leitor@demo.com` (somente leitura).
+Na tela de login: **Entrar como visitante** (sem cadastro), **Criar conta** ou **Esqueceu a senha?**. Na versão estática, as contas ficam no navegador com senha protegida por PBKDF2-SHA256; com o backend, o mesmo fluxo usa JWT, bcrypt e e-mail.
 
 ![Overview](docs/screenshots/overview.png)
+
+## Inspiração e abordagem didática
+
+O desenho se inspira em ferramentas de referência de performance de marketing: o resumo em frases e os cartões de KPI do **Triple Whale**, a visão por canal e a discussão de atribuição do **Northbeam**, os insights automáticos do **GA4** e a organização de painéis do **HubSpot**. O editor de automações segue a lógica de nós do **n8n**, Make e Zapier.
+
+O **modo didático** (ligado por padrão) acrescenta: um guia de leitura em cada tela, uma frase em linguagem simples sob cada indicador ("cada R$ 1 em anúncios trouxe R$ 3,86"), o resumo narrativo do período no Overview, um tour de boas-vindas e a página **Aprenda**, com o caminho do investimento ao lucro e um glossário que usa os números do período como exemplo. A busca rápida (**Ctrl+K**) abre qualquer tela, campanha ou pergunta para a IA.
 
 ## O que a aplicação faz
 
@@ -33,7 +39,8 @@ Contas de demonstração (senha `demo123`): `admin@demo.com` (administrador) · 
 | | |
 |---|---|
 | ![Workflow builder](docs/screenshots/workflow-builder.png) | ![AI Analyst](docs/screenshots/ai-analyst.png) |
-| ![Funil](docs/screenshots/funnel.png) | ![Dark mode](docs/screenshots/overview-dark.png) |
+| ![Funil](docs/screenshots/funnel.png) | ![Tema escuro](docs/screenshots/overview-dark.png) |
+| ![Login](docs/screenshots/login.png) | ![Aprenda](docs/screenshots/learn.png) |
 
 ## Fórmulas e regras de negócio
 

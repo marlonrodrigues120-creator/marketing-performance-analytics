@@ -4,9 +4,10 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
-      fontFamily: { sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'] },
+      fontFamily: { sans: ['Geist', 'Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'] },
       colors: {
-        brand: { 50: '#eef5fd', 100: '#cde2fb', 200: '#9ec5f4', 300: '#6da7ec', 400: '#3987e5', 500: '#2a78d6', 600: '#1c5cab', 700: '#184f95', 800: '#104281', 900: '#0d366b' },
+        brand: { 50: '#eef1ff', 100: '#dfe5ff', 200: '#c3cdff', 300: '#9aabff', 400: '#6c82fe', 500: '#3b5bfd', 600: '#2a44e0', 700: '#2236b4', 800: '#1e2f8e', 900: '#1c2b70' },
+        navy: { 700: '#1a2346', 800: '#121a38', 900: '#0d1430', 950: '#090e22' },
         ai: { 50: '#f3f1fd', 100: '#e4e0fb', 200: '#c9c2f5', 300: '#a99ef0', 400: '#9085e9', 500: '#6250d6', 600: '#4f3fc0', 700: '#41339f', 800: '#332880', 900: '#271f63' },
         good: { DEFAULT: '#0ca30c', ink: '#006300' },
         bad: { DEFAULT: '#d03b3b' },

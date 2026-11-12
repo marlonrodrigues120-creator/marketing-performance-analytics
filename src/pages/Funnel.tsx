@@ -9,6 +9,7 @@ import { sum } from '../lib/metrics'
 import type { Totals } from '../data/types'
 import { num, percent, signedPct } from '../lib/format'
 import { groupBy } from '../lib/metrics'
+import { PageGuide } from '../components/didactic'
 
 const STAGES = [
   { key: 'impressions', label: 'Impressions', pt: 'Impressões' },
@@ -70,13 +71,13 @@ export default function Funnel() {
     return channels.filter((c) => g.has(c.id)).map((c) => ({ ch: c, r: rates(sum(g.get(c.id)!)) }))
   }, [a, channels])
 
-  if (!a.rows.length) return <><PageHeader title="Conversion Funnel" /><div className="card"><EmptyState title="Sem dados para os filtros selecionados" /></div></>
+  if (!a.rows.length) return <><PageHeader title="Funil de conversão" /><div className="card"><EmptyState title="Sem dados para os filtros selecionados" /></div></>
 
   const max = Math.log10(Math.max(10, cur[0].v))
   return (
     <>
       <PageHeader
-        title="Conversion Funnel"
+        title="Funil de conversão"
         description="Funil de aquisição da impressão ao cliente. Os gargalos são detectados comparando cada taxa com referências de mercado e com o período anterior."
         badge={<DemoBadge />}
         actions={
@@ -87,6 +88,7 @@ export default function Funnel() {
           </select>
         }
       />
+      <PageGuide id="funnel" />
       {!scopedRows.cur.length ? (
         <div className="card"><EmptyState title="Sem dados para este escopo no período" /></div>
       ) : (
@@ -106,7 +108,7 @@ export default function Funnel() {
                       </div>
                     )}
                     <div className="flex justify-center">
-                      <div className={clsx('relative flex h-11 items-center justify-between rounded-lg px-3 text-white transition-all duration-500', isBottleneck && 'ring-2 ring-bad ring-offset-2 dark:ring-offset-[#121722]')} style={{ width: `${w}%`, background: t.dark ? ['#3987e5', '#2f78d4', '#2a6bbf', '#2a5fa8', '#6250d6', '#4f3fc0'][i] : ['#6da7ec', '#3987e5', '#2a78d6', '#1c5cab', '#6250d6', '#41339f'][i] }}>
+                      <div className={clsx('relative flex h-11 items-center justify-between rounded-lg px-3 text-white transition-all duration-500', isBottleneck && 'ring-2 ring-bad ring-offset-2 dark:ring-offset-[#0d1430]')} style={{ width: `${w}%`, background: t.dark ? ['#3987e5', '#2f78d4', '#2a6bbf', '#2a5fa8', '#6250d6', '#4f3fc0'][i] : ['#6da7ec', '#3987e5', '#2a78d6', '#1c5cab', '#6250d6', '#41339f'][i] }}>
                         <span className="truncate text-xs font-medium">{s.label}</span>
                         <span className="text-sm font-semibold tabular-nums">{num(s.v, { compact: true })}</span>
                       </div>

@@ -24,7 +24,7 @@ export function TrendLine({ data, dataKey, name, fmt, reference, refLabel, color
         <Tooltip cursor={{ stroke: t.axis }} content={makeTip((_k, v) => fmt(v))} />
         {reference !== undefined && <ReferenceLine y={reference} stroke={t.ai} strokeDasharray="4 4" label={{ value: refLabel, position: 'insideTopRight', fill: t.ai, fontSize: 11 }} />}
         {compare && <Line type="monotone" dataKey={compare} name={compareName} stroke={t.muted} strokeWidth={2} strokeDasharray="4 3" dot={false} connectNulls />}
-        <Line type="monotone" dataKey={dataKey} name={name} stroke={c} strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 2, stroke: t.dark ? '#121722' : '#fff' }} connectNulls />
+        <Line type="monotone" dataKey={dataKey} name={name} stroke={c} strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 2, stroke: t.dark ? '#0d1430' : '#fff' }} connectNulls />
       </LineChart>
     </ResponsiveContainer>
   )
@@ -65,7 +65,7 @@ const PRIO_TONE = { Alta: 'red', Média: 'amber', Baixa: 'gray' } as const
 
 export function InsightCard({ i, compact }: { i: Insight; compact?: boolean }) {
   return (
-    <div className="card flex flex-col p-4 transition hover:shadow-md animate-fade-up">
+    <div className="card flex flex-col p-4 transition hover:shadow-md">
       <div className="flex items-start gap-3">
         <div className={clsx('mt-0.5 rounded-lg p-2', i.type === 'problem' ? 'bg-red-50 text-bad dark:bg-red-500/10' : 'bg-ai-50 text-ai-500 dark:bg-ai-500/15 dark:text-ai-300')}>{i.type === 'problem' ? <AlertTriangle size={16} /> : <Lightbulb size={16} />}</div>
         <div className="min-w-0 flex-1">

@@ -7,8 +7,9 @@ import { TEMPLATES, workflowFromTemplate } from '../automation/templates'
 import { runWorkflow } from '../automation/engine'
 import { addDays } from '../lib/query'
 import { uid } from '../automation/catalog'
+import { authenticate, createAccount } from './auth'
 
-export type Role = 'admin' | 'analyst' | 'viewer'
+export type Role = 'admin' | 'analyst' | 'viewer' | 'visitor'
 export interface User {
   name: string
   email: string
@@ -87,8 +88,14 @@ export function presetRange(p: PeriodPreset, dataEnd: string, custom?: { start: 
 
 interface Store {
   user: User | null
-  login: (email: string, password: string) => string | null
+  login: (email: string, password: string) => Promise<string | null>
+  signup: (name: string, email: string, password: string) => Promise<string | null>
+  enterAsVisitor: () => void
   logout: () => void
+  didactic: boolean
+  setDidactic: (v: boolean) => void
+  tourSeen: boolean
+  setTourSeen: (v: boolean) => void
   can: (perm: 'edit' | 'delete' | 'admin') => boolean
   channels: Channel[]
   campaigns: Campaign[]
@@ -125,12 +132,6 @@ interface Store {
 }
 
 const Ctx = createContext<Store | null>(null)
-
-const DEMO_USERS: Record<string, { password: string; user: User }> = {
-  'admin@demo.com': { password: 'demo123', user: { name: 'Marlon Rodrigues', email: 'admin@demo.com', role: 'admin' } },
-  'analista@demo.com': { password: 'demo123', user: { name: 'Analista de Marketing', email: 'analista@demo.com', role: 'analyst' } },
-  'leitor@demo.com': { password: 'demo123', user: { name: 'Diretoria (leitura)', email: 'leitor@demo.com', role: 'viewer' } },
-}
 
 type ImportedRow = DailyMetric & { importId: string }
 
@@ -189,6 +190,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [imports, setImports] = useState<ImportRecord[]>(() => load(LS.imports, []))
   const [tags, setTags] = useState<Record<string, string[]>>(() => load(LS.tags, {}))
   const [scenarios, setScenarios] = useState<Scenario[]>(() => load(LS.scenarios, []))
+  const [didactic, setDidactic] = useState<boolean>(() => load('mpa.didactic', true))
+  const [tourSeen, setTourSeen] = useState<boolean>(() => load('mpa.tourSeen', false))
+  useEffect(() => { save('mpa.didactic', didactic) }, [didactic])
+  useEffect(() => { save('mpa.tourSeen', tourSeen) }, [tourSeen])
   const [notifications, setNotifications] = useState<AppNotification[]>(() => load(LS.notifications, []))
 
   const campaigns = useMemo(() => [...demo.campaigns, ...importedCampaigns], [demo, importedCampaigns])
@@ -275,16 +280,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const store: Store = {
     user,
-    login: (email, password) => {
-      const u = DEMO_USERS[email.trim().toLowerCase()]
-      if (!u || u.password !== password) return 'E-mail ou senha inválidos.'
-      setUser(u.user)
-      return null
+    login: async (email, password) => {
+      try {
+        const acc = await authenticate(email, password)
+        setUser({ name: acc.name, email: acc.email, role: 'admin' })
+        return null
+      } catch (e) {
+        return (e as Error).message
+      }
     },
+    signup: async (name, email, password) => {
+      try {
+        const acc = await createAccount(name, email, password)
+        setUser({ name: acc.name, email: acc.email, role: 'admin' })
+        setTourSeen(false)
+        return null
+      } catch (e) {
+        return (e as Error).message
+      }
+    },
+    enterAsVisitor: () => setUser({ name: 'Visitante', email: 'visitante', role: 'visitor' }),
     logout: () => setUser(null),
+    didactic,
+    setDidactic,
+    tourSeen,
+    setTourSeen,
     can: (perm) => {
       if (!user) return false
-      if (perm === 'admin' || perm === 'delete') return user.role === 'admin'
+      // visitante explora tudo num ambiente isolado no próprio navegador
+      if (user.role === 'admin' || user.role === 'visitor') return true
+      if (perm === 'admin' || perm === 'delete') return false
       return user.role !== 'viewer'
     },
     channels: CHANNELS,

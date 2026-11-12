@@ -41,7 +41,7 @@ function WfNodeView({ data, selected }: NodeProps<FNode>) {
   const def = defOf(data.type as string)
   const run = data.runStatus as 'success' | 'error' | 'skipped' | undefined
   return (
-    <div className={clsx('w-[220px] overflow-hidden rounded-xl border bg-white shadow-sm transition dark:bg-[#161c28]', selected ? 'border-brand-400 ring-2 ring-brand-400/30' : 'border-slate-200 dark:border-white/10', run === 'success' && 'ring-2 ring-emerald-400/60', run === 'error' && 'ring-2 ring-red-400/70', run === 'skipped' && 'opacity-60')}>
+    <div className={clsx('w-[220px] overflow-hidden rounded-xl border bg-white shadow-sm transition dark:bg-[#121a38]', selected ? 'border-brand-400 ring-2 ring-brand-400/30' : 'border-slate-200 dark:border-white/10', run === 'success' && 'ring-2 ring-emerald-400/60', run === 'error' && 'ring-2 ring-red-400/70', run === 'skipped' && 'opacity-60')}>
       <div className={clsx('h-1', st.bar)} />
       <div className="p-3">
         <div className="flex items-center gap-2">
@@ -56,16 +56,16 @@ function WfNodeView({ data, selected }: NodeProps<FNode>) {
         </div>
         <div className="mt-2 line-clamp-2 text-[10px] leading-snug muted">{summary(data)}</div>
       </div>
-      {data.kind !== 'trigger' && <Handle type="target" position={Position.Left} className="!h-3 !w-3 !border-2 !border-white !bg-slate-400 dark:!border-[#161c28]" />}
+      {data.kind !== 'trigger' && <Handle type="target" position={Position.Left} className="!h-3 !w-3 !border-2 !border-white !bg-slate-400 dark:!border-[#121a38]" />}
       {data.kind === 'condition' ? (
         <>
-          <Handle id="true" type="source" position={Position.Right} style={{ top: '35%' }} className="!h-3 !w-3 !border-2 !border-white !bg-emerald-500 dark:!border-[#161c28]" />
-          <Handle id="false" type="source" position={Position.Right} style={{ top: '75%' }} className="!h-3 !w-3 !border-2 !border-white !bg-red-500 dark:!border-[#161c28]" />
+          <Handle id="true" type="source" position={Position.Right} style={{ top: '35%' }} className="!h-3 !w-3 !border-2 !border-white !bg-emerald-500 dark:!border-[#121a38]" />
+          <Handle id="false" type="source" position={Position.Right} style={{ top: '75%' }} className="!h-3 !w-3 !border-2 !border-white !bg-red-500 dark:!border-[#121a38]" />
           <span className="absolute right-3 top-[28%] text-[8px] font-bold text-emerald-600">SIM</span>
           <span className="absolute right-3 top-[68%] text-[8px] font-bold text-red-500">NÃO</span>
         </>
       ) : (
-        <Handle type="source" position={Position.Right} className="!h-3 !w-3 !border-2 !border-white !bg-brand-500 dark:!border-[#161c28]" />
+        <Handle type="source" position={Position.Right} className="!h-3 !w-3 !border-2 !border-white !bg-brand-500 dark:!border-[#121a38]" />
       )}
     </div>
   )
@@ -207,8 +207,8 @@ function BuilderInner() {
   })()
 
   return (
-    <div className="-mx-4 -my-5 flex h-[calc(100vh-4rem)] flex-col sm:-mx-6 lg:-mx-8">
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-white px-4 py-2.5 dark:border-white/10 dark:bg-[#0e121a]">
+    <div className="-mx-4 -my-6 flex h-[calc(100vh-4rem)] flex-col sm:-mx-6 lg:-mx-8">
+      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-white px-4 py-2.5 dark:border-white/10 dark:bg-[#0b1128]">
         <Link to="/automation" className="btn-ghost p-1.5" aria-label="Voltar"><ArrowLeft size={16} /></Link>
         <div className="min-w-0 flex-1">
           <input className="w-full bg-transparent text-sm font-semibold focus:outline-none" value={meta.name} onChange={(e) => { setMeta({ ...meta, name: e.target.value }); mark() }} aria-label="Nome do workflow" maxLength={80} disabled={readOnly} />
@@ -222,7 +222,7 @@ function BuilderInner() {
         <button className="btn-primary btn-sm" onClick={() => save()} disabled={readOnly}><Save size={13} /> Salvar</button>
       </div>
       <div className="flex min-h-0 flex-1">
-        <aside className="hidden w-60 shrink-0 overflow-y-auto border-r border-slate-200 bg-white p-3 dark:border-white/10 dark:bg-[#0e121a] md:block">
+        <aside className="hidden w-60 shrink-0 overflow-y-auto border-r border-slate-200 bg-white p-3 dark:border-white/10 dark:bg-[#0b1128] md:block">
           {[{ t: 'Triggers', items: TRIGGERS }, { t: 'Conditions', items: [CONDITION] }, { t: 'Actions', items: ACTIONS }].map((g) => (
             <div key={g.t} className="mb-4">
               <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider muted">{g.t}</div>
@@ -278,7 +278,7 @@ function BuilderInner() {
             </div>
           )}
         </div>
-        <aside className="hidden w-80 shrink-0 overflow-y-auto border-l border-slate-200 bg-white dark:border-white/10 dark:bg-[#0e121a] lg:block">
+        <aside className="hidden w-80 shrink-0 overflow-y-auto border-l border-slate-200 bg-white dark:border-white/10 dark:bg-[#0b1128] lg:block">
           {sel ? (
             <NodeConfig key={sel.id} n={sel} readOnly={readOnly} onLabel={(l) => updateData({ label: l })} onConfig={updateConfig} onRemove={removeSel} />
           ) : (

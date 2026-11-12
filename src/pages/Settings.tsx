@@ -43,7 +43,7 @@ export default function Settings() {
 
   return (
     <>
-      <PageHeader title="Settings" description="Configurações gerais, metas usadas por insights/alertas/score e integrações." actions={<>{dirty && <Badge tone="blue">Alterações não salvas</Badge>}<button className="btn-secondary" disabled={!dirty} onClick={() => setDraft(s.settings)}>Descartar</button><button className="btn-primary" disabled={!dirty || !valid || !admin} onClick={saveAll}><Save size={14} /> Salvar</button></>} />
+      <PageHeader title="Configurações" description="Configurações gerais, metas usadas por insights/alertas/score e integrações." actions={<>{dirty && <Badge tone="blue">Alterações não salvas</Badge>}<button className="btn-secondary" disabled={!dirty} onClick={() => setDraft(s.settings)}>Descartar</button><button className="btn-primary" disabled={!dirty || !valid || !admin} onClick={saveAll}><Save size={14} /> Salvar</button></>} />
       {!admin && <p className="mb-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-900 dark:bg-amber-500/10 dark:text-amber-200">Você está com perfil <b>{s.user?.role === 'analyst' ? 'Analista' : 'Leitura'}</b>: pode visualizar, mas somente administradores alteram configurações.</p>}
       <Tabs value={tab} onChange={setTab} tabs={[{ value: 'rules', label: 'Metas e regras de negócio' }, { value: 'score', label: 'Campaign Score' }, { value: 'integrations', label: 'Integrações' }, { value: 'users', label: 'Usuários e acesso' }, { value: 'data', label: 'Dados' }]} />
 
@@ -115,16 +115,17 @@ export default function Settings() {
         <Card title={<span className="flex items-center gap-1.5"><Users size={15} /> Usuários e perfis de acesso</span>} subtitle="Controle de acesso baseado em papéis (RBAC), aplicado no frontend e validado no backend em cada endpoint">
           <div className="-mx-4 overflow-x-auto sm:-mx-5">
             <table className="w-full min-w-[640px] text-sm">
-              <thead><tr className="border-b border-slate-100 dark:border-white/5">{['Usuário', 'Perfil', 'Visualizar', 'Criar/editar workflows e importar', 'Excluir, reverter e configurar'].map((h, i) => <th key={h} className={clsx('th', i === 0 && 'pl-5')}>{h}</th>)}</tr></thead>
+              <thead><tr className="border-b border-slate-100 dark:border-white/5">{['Perfil', 'Para quem', 'Visualizar', 'Criar/editar workflows e importar', 'Excluir, reverter e configurar'].map((h, i) => <th key={h} className={clsx('th', i === 0 && 'pl-5')}>{h}</th>)}</tr></thead>
               <tbody>
                 {[
-                  ['admin@demo.com', 'Administrador', true, true, true],
-                  ['analista@demo.com', 'Analista', true, true, false],
-                  ['leitor@demo.com', 'Leitura', true, false, false],
-                ].map(([e, r, ...p]) => (
-                  <tr key={String(e)} className="border-b border-slate-50 dark:border-white/5">
-                    <td className="td pl-5">{e} {s.user?.email === e && <Badge tone="blue">você</Badge>}</td>
-                    <td className="td">{r}</td>
+                  ['Administrador', 'Quem cria a conta', true, true, true],
+                  ['Analista', 'Convidado pela equipe (com backend)', true, true, false],
+                  ['Leitura', 'Diretoria e clientes (com backend)', true, false, false],
+                  ['Visitante', 'Entrada sem cadastro, isolada no navegador', true, true, true],
+                ].map(([r, e, ...p]) => (
+                  <tr key={String(r)} className="border-b border-slate-50 dark:border-white/5">
+                    <td className="td pl-5 font-medium">{r} {((s.user?.role === 'visitor' && r === 'Visitante') || (s.user?.role === 'admin' && r === 'Administrador')) && <Badge tone="blue">você</Badge>}</td>
+                    <td className="td text-slate-500">{e}</td>
                     {p.map((v, i) => <td key={i} className="td">{v ? <CheckCircle2 size={15} className="text-good" /> : <span className="muted">—</span>}</td>)}
                   </tr>
                 ))}

@@ -10,6 +10,7 @@ import { MetricSelect, RankBars } from '../components/widgets'
 import { channelStats, type ChannelStat } from '../lib/query'
 import { KPIS, getKpi, type KpiKey } from '../lib/kpis'
 import { money, num, percent } from '../lib/format'
+import { PageGuide } from '../components/didactic'
 
 const METRICS: KpiKey[] = ['investment', 'revenue', 'impressions', 'clicks', 'leads', 'customers', 'cac', 'cpl', 'cpc', 'ctr', 'convRate', 'roas', 'roi', 'profit']
 
@@ -59,7 +60,7 @@ export default function Channels() {
   const ranking = useMemo(() => efficiency(stats), [stats])
   const cmp = stats.filter((s) => compare.includes(s.channel.id))
 
-  if (!stats.length) return <><PageHeader title="Channel Analytics" /><div className="card"><EmptyState title="Sem dados de canais para os filtros selecionados" /></div></>
+  if (!stats.length) return <><PageHeader title="Canais" /><div className="card"><EmptyState title="Sem dados de canais para os filtros selecionados" /></div></>
 
   const cols: Column<ChannelStat>[] = [
     { key: 'name', header: 'Canal', sticky: true, value: (r) => r.channel.name, render: (r) => <span className="flex items-center gap-2 font-medium"><span className="h-2.5 w-2.5 rounded-sm" style={{ background: r.channel.color }} />{r.channel.name}<span className="text-[10px] font-normal muted">{r.channel.kind}</span></span> },
@@ -68,13 +69,14 @@ export default function Channels() {
 
   return (
     <>
-      <PageHeader title="Channel Analytics" description="Comparação entre canais de aquisição. Canais sem investimento em mídia não têm CPC nem ROAS (exibidos como —)." badge={<DemoBadge />} />
+      <PageHeader title="Canais" description="Comparação entre canais de aquisição. Canais sem investimento em mídia não têm CPC nem ROAS (exibidos como —)." badge={<DemoBadge />} />
+      <PageGuide id="channels" />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {LEADERS.map((l) => {
           const valid = stats.filter((s) => getKpi(s.d, l.k) !== null && (l.k !== 'convRate' || s.d.clicks > 500))
           const best = valid.sort((x, y) => (l.dir === 'max' ? getKpi(y.d, l.k)! - getKpi(x.d, l.k)! : getKpi(x.d, l.k)! - getKpi(y.d, l.k)!))[0]
           return (
-            <div key={l.k} className="card p-4 animate-fade-up">
+            <div key={l.k} className="card p-4">
               <div className="text-[11px] font-medium muted">{l.title}</div>
               {best ? (
                 <>

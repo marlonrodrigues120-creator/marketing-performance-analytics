@@ -7,6 +7,7 @@ import { Badge, Card, DataTable, EmptyState, Modal, PageHeader, Segmented, toast
 import type { Campaign, DailyMetric } from '../data/types'
 import { dateTimeBR, money, num } from '../lib/format'
 import { isoDate } from '../data/seed'
+import { PageGuide } from '../components/didactic'
 
 const FIELDS = [
   { key: 'date', label: 'Data', required: true, syn: ['date', 'data', 'dia', 'day'] },
@@ -210,7 +211,8 @@ export default function DataImport() {
 
   return (
     <>
-      <PageHeader title="Data Import" description="Importe dados de campanhas via CSV com mapeamento de colunas, validação, detecção de duplicidades e confirmação. A arquitetura está preparada para conectores de API." actions={<button className="btn-secondary" onClick={sampleCsv}><Download size={14} /> CSV de exemplo</button>} />
+      <PageHeader title="Importar dados" description="Importe dados de campanhas via CSV com mapeamento de colunas, validação, detecção de duplicidades e confirmação. A arquitetura está preparada para conectores de API." actions={<button className="btn-secondary" onClick={sampleCsv}><Download size={14} /> CSV de exemplo</button>} />
+      <PageGuide id="import" />
       <div className="mb-4 flex items-center gap-2 text-xs">
         {['Upload', 'Mapeamento', 'Validação', 'Confirmação'].map((l, i) => (
           <div key={l} className="flex items-center gap-2">
@@ -277,7 +279,7 @@ export default function DataImport() {
               {stats.newCamps.length > 0 && <p className="mt-3 rounded-lg bg-brand-50 p-2.5 text-xs text-brand-800 dark:bg-brand-500/10 dark:text-brand-200">Novas campanhas serão criadas: <b>{stats.newCamps.join(', ')}</b></p>}
               <div className="-mx-4 mt-4 max-h-80 overflow-auto sm:-mx-5">
                 <table className="w-full min-w-[720px] text-xs">
-                  <thead className="sticky top-0 bg-white dark:bg-[#121722]"><tr>{['Linha', 'Data', 'Campanha', 'Investimento', 'Leads', 'Conversões', 'Receita', 'Situação'].map((h, i) => <th key={h} className={clsx('th border-b border-slate-100 dark:border-white/5', i === 0 && 'pl-5')}>{h}</th>)}</tr></thead>
+                  <thead className="sticky top-0 bg-white dark:bg-[#0d1430]"><tr>{['Linha', 'Data', 'Campanha', 'Investimento', 'Leads', 'Conversões', 'Receita', 'Situação'].map((h, i) => <th key={h} className={clsx('th border-b border-slate-100 dark:border-white/5', i === 0 && 'pl-5')}>{h}</th>)}</tr></thead>
                   <tbody>
                     {checked.map((c) => (
                       <tr key={c.line} className={clsx(c.errors.length ? 'bg-red-50/60 dark:bg-red-500/5' : c.duplicate ? 'bg-amber-50/60 dark:bg-amber-500/5' : '')}>

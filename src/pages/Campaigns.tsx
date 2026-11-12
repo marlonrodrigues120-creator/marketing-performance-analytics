@@ -9,6 +9,7 @@ import { campaignStats, type CampaignStat } from '../lib/query'
 import { scoreCampaign, type CampaignScore } from '../lib/score'
 import { money, num, percent, ratio } from '../lib/format'
 import clsx from 'clsx'
+import { PageGuide } from '../components/didactic'
 
 type Row = CampaignStat & { score: CampaignScore; rank: 'top' | 'bottom' | null }
 
@@ -91,7 +92,8 @@ export default function Campaigns() {
 
   return (
     <>
-      <PageHeader title="Campaign Analytics" description="Acompanhamento individual das campanhas. Valores em vermelho excedem os limites de CAC/CPL ou ficam abaixo da meta de ROAS configurados em Settings." badge={<DemoBadge />} actions={<><Link to="/settings#score" className="btn-secondary"><SlidersHorizontal size={14} /> Metas e pesos do score</Link><button className="btn-secondary" onClick={download} disabled={!shown.length}><Download size={14} /> Exportar CSV</button></>} />
+      <PageHeader title="Campanhas" description="Acompanhamento individual das campanhas. Valores em vermelho excedem os limites de CAC/CPL ou ficam abaixo da meta de ROAS configurados em Settings." badge={<DemoBadge />} actions={<><Link to="/settings#score" className="btn-secondary"><SlidersHorizontal size={14} /> Metas e pesos do score</Link><button className="btn-secondary" onClick={download} disabled={!shown.length}><Download size={14} /> Exportar CSV</button></>} />
+      <PageGuide id="campaigns" />
       {rows.length === 0 ? (
         <div className="card"><EmptyState title="Nenhuma campanha com dados no período" description="Ajuste os filtros globais." /></div>
       ) : (
